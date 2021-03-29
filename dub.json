@@ -1,0 +1,10 @@
+{
+	"name": "gboard-forensics",
+	"sourcePaths": ["source"],
+	"importPaths": ["source"],
+	"targetPath": "bin/",
+	"dependencies": {
+		"d2sqlite3": "~>0.19.1",
+		"asdf": "~>0.7.5"
+	}
+}
