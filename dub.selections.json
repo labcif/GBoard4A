@@ -1,0 +1,9 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"asdf": "0.7.5",
+		"d2sqlite3": "0.19.1",
+		"mir-algorithm": "3.10.36",
+		"mir-core": "1.1.63"
+	}
+}
