@@ -1,2 +1,5 @@
 gboard-data-*/
 *.apk
+
+.dub/
+bin/
