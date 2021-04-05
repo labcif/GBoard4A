@@ -7,6 +7,10 @@ import gboardforensics.analysis;
 import gboardforensics.analysis.file;
 import gboardforensics.analysis.datadir;
 
+import std.algorithm;
+import std.file;
+import std.typecons;
+
 /**
  * Options passed to the program arguments
  */
@@ -53,9 +57,15 @@ int main(string[] args)
 	}
 
 	// check if output folder exists
-	if(opt.output && !exists(dirName(opt.output)))
+	if(opt.output && !opt.output.dirName().exists())
 	{
 		stderr.writefln!"The ouput folder specified '%s' does not exist!"(opt.output);
+		return ENOENT;
+	}
+
+	if (opt.files.length > 0 && opt.files.any!(f => !f.exists()))
+	{
+		stderr.writefln!"One or more files specified [%-('%s', %)] do not exist!"(opt.files.filter!(f => !f.exists()));
 		return ENOENT;
 	}
 
