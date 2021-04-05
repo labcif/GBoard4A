@@ -1,7 +1,6 @@
 module gboardforensics.analysis.file;
 
 import gboardforensics.gatherers;
-import gboardforensics.gatherers.dictionary;
 import gboardforensics.analysis;
 
 import std.stdio;
@@ -77,7 +76,8 @@ struct FileDetector
 			// detect file based on it's name
 			switch(baseName(file.name))
 			{
-				case "PersonalDictionary.db": return new DictionaryGatherer(file.name);
+				case DB.PersonalDictionary: return new DictionaryGatherer(file.name);
+				case DB.Trainingcache2: return new TrainingCacheGatherer(file.name, DBVERSION.Trainingcache2);
 
 				// no detection
 				default: return null;

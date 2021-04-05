@@ -20,7 +20,8 @@ AnalysisData dataDirAnalysis(string dir)
 	AnalysisData analysisData;
 
 	static immutable relativePaths = [
-		"databases/PersonalDictionary.db",
+		"databases/"~DB.PersonalDictionary,
+		"databases/"~DB.Trainingcache2,
 	];
 
 	foreach(path; relativePaths)
