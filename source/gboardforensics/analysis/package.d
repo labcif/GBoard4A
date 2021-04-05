@@ -1,12 +1,28 @@
 module gboardforensics.analysis;
 
 import gboardforensics.gatherers;
-import gboardforensics.gatherers.dictionary;
-import gboardforensics.models.dictionary;
-
+import gboardforensics.models;
 
 import std.json;
 import std.exception;
+
+import asdf : serdeIgnoreDefault;
+
+public {
+	import gboardforensics.analysis.datadir;
+	import gboardforensics.analysis.file;
+}
+
+enum DB : string
+{
+	PersonalDictionary = "PersonalDictionary.db",
+	Trainingcache2 = "trainingcache2.db",
+}
+
+enum DBVERSION
+{
+	Trainingcache2,
+}
 
 /**
  * This exception represents a failure on the analysis process. This exception
@@ -39,6 +55,7 @@ struct AnalysisData
 
 		// dynamically detect gatherer type
 		if(ti is typeid(DictionaryGatherer)) add(cast(DictionaryGatherer) gatherer);
+		else if (ti is typeid(TrainingCacheGatherer)) add(cast(TrainingCacheGatherer) gatherer);
 		else throw new FailedAnalysisException("Unknown analysis gatherer!");
 	}
 
@@ -48,6 +65,12 @@ struct AnalysisData
 		this.dictionaries ~= gatherer.dictionary;
 	}
 
+	void add(TrainingCacheGatherer gatherer)
+	{
+		this.trainingcache ~= gatherer.trainingcache;
+	}
+
 	/// found dictionaries
-	const(Dictionary)[] dictionaries;
+	@serdeIgnoreDefault const(Dictionary)[] dictionaries;
+	@serdeIgnoreDefault const(TrainingCache)[] trainingcache;
 }
