@@ -1,0 +1,44 @@
+name: Build and Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Dub Tests
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        dc: [dmd-latest, ldc-latest]
+        exclude:
+          - { os: macOS-latest, dc: dmd-latest }
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install D compiler
+        uses: dlang-community/setup-dlang@v1
+        with:
+          compiler: ${{ matrix.dc }}
+
+      - name: 'macOS: Install dependencies'
+        if: runner.os == 'macOS'
+        run: |
+          brew install coreutils pkg-config sqlite
+          echo "LIBRARY_PATH=${LD_LIBRARY_PATH-}:/usr/local/lib/" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=/usr/local/opt/sqlite/lib/pkgconfig" >> $GITHUB_ENV
+
+      - name: 'Windows: Get and setup dependencies'
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/dlang-community/d2sqlite3/master/lib/win64/sqlite3.lib -OutFile ${{ github.workspace }}\sqlite3.lib
+
+      - name: Run tests
+        run: dub test --build=cov
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests
+          fail_ci_if_error: true
