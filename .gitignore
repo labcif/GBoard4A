@@ -1,5 +1,13 @@
+# Extracted android user data
 gboard-data-*/
 *.apk
 
+# Dub related stuff
 .dub/
 bin/
+
+# App binary
+gboard-forensics
+
+# Jython output files
+*.class
