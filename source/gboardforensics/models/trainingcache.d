@@ -14,9 +14,8 @@ struct TrainingCache
 		size_t timestamp;
 	}
 
-
-	@serdeIgnore string path;
-
+	/// File path
+	string path;
 
 	/// All keystrokes.
 	Info[] inserted;
