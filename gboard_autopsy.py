@@ -47,6 +47,12 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
     GBOARD_DICTIONARY_SHORTCUT_ATTRIBUTE = 'GBOARD_DICTIONARY_SHORTCUT_OBJECT'
     GBOARD_DICTIONARY_LOCALE_ATTRIBUTE = 'GBOARD_DICTIONARY_LOCALE_OBJECT'
 
+    GBOARD_TC_RAW_HISTORY_ARTIFACT = 'GBOARD_TC_RAW_HISTORY_OBJECT'
+    GBOARD_TC_RAW_AHISTORY_ARTIFACT = 'GBOARD_TC_RAW_AHISTORY_OBJECT'
+    GBOARD_TC_RELEVANT_HISTORY_ARTIFACT = 'GBOARD_TC_RELEVANT_HISTORY_OBJECT'
+
+    GBOARD_TC_DELETE_FLAG_ATTRIBUTE = 'GBOARD_TC_DELETE_FLAG_OBJECT'
+
     GBOARD_PACKAGE_NAME = 'com.google.android.inputmethod.latin'
 
     def log(self, level, msg):
@@ -80,6 +86,12 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
             # create artifacts
             self.dictionary_art_type = self.createCustomArtifactType(current_case, self.GBOARD_DICTIONARY_ARTIFACT, 'Gboard Dictionary')
+            self.tc_raw_history_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RAW_HISTORY_ARTIFACT, 'Gboard Raw History')
+            self.tc_raw_ahistory_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RAW_AHISTORY_ARTIFACT, 'Gboard Raw Assembled History')
+            self.tc_relevant_history_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RELEVANT_HISTORY_ARTIFACT, 'Gboard Relevant History')
+
+            # training cache attributes
+            self.tc_delete_flag_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TC_DELETE_FLAG_ATTRIBUTE, 'Deleted?')
 
             # clipboard attributes
             self.clipboard_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_CLIPBOARD_ATTRIBUTE, 'Gboard Clipboard')
@@ -243,6 +255,27 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
                     (self.dictionary_shortcut_attr_type, entry['shortcut']),
                     (self.dictionary_locale_attr_type, entry['locale'])
                 ])
+
+        for trainingcache in analysis_output['trainingcache']:
+            file = self.get_common_sufix_file(data_source, file_manager, input_dir, trainingcache['path'])
+            # process raw histories
+            for entry in trainingcache['rawHistory']:
+                self.publish_raw_history_artifact(blackboard, file, entry, self.tc_raw_history_art_type)
+            for entry in trainingcache['rawAssembledHistory']:
+                self.publish_raw_history_artifact(blackboard, file, entry, self.tc_raw_ahistory_art_type)
+            # process relevant histories
+            for entry in trainingcache['relevantHistory']:
+                self.publish_analysis_artifact(blackboard, file, self.tc_relevant_history_art_type, [
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp']),
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, entry['sequence']),
+                ])
+
+    def publish_raw_history_artifact(self, blackboard, file, entry, art_type):
+        self.publish_analysis_artifact(blackboard, file, art_type, [
+            (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp']),
+            (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, entry['sequence']),
+            (self.tc_delete_flag_attr_type, str(entry['deleted']))
+        ])
 
     def get_common_sufix_file(self, data_source, file_manager, common_path, full_path):
         if not common_path.endswith(os.path.sep):
