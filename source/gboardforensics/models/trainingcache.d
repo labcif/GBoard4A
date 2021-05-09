@@ -15,7 +15,7 @@ struct TrainingCache
 	}
 
 	/// File path
-	string path;
+	immutable string path;
 
 	/// All keystrokes.
 	Info[] inserted;
