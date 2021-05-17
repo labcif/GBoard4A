@@ -85,7 +85,7 @@ class TrainingCacheGatherer : IGatherer
 				return info;
 			}).array;
 
-			immutable historyQuery = r"
+			static immutable historyQuery = r"
 				SELECT * FROM (
 					SELECT datetime(_timestamp/1000, 'unixepoch') as time, f2, f3 as sequence, false as deleted, _timestamp
 					FROM tf_table
