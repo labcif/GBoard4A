@@ -84,6 +84,20 @@ struct AnalysisData
 		this.clipboard ~= gatherer.clipboard;
 	}
 
+	/**
+	 * Calculates the number of total items inside a anlysis data
+	 *
+	 * Returns: number of total items
+	 */
+	size_t countItems() const
+	{
+		return dictionaries.countItems()
+			+ trainingcache.countItems();
+	}
+
+	/// analysis path
+	@serdeIgnoreDefault string path;
+
 	/// found dictionaries
 	@serdeIgnoreDefault const(Dictionary)[] dictionaries;
 	/// found training caches

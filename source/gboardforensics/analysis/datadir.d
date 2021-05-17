@@ -6,6 +6,7 @@ import gboardforensics.analysis.file;
 import std.path;
 import std.file;
 import std.format;
+import std.array;
 
 /**
  * Performs a full data directory analysis
@@ -18,6 +19,10 @@ import std.format;
 AnalysisData dataDirAnalysis(string dir)
 {
 	AnalysisData analysisData;
+	analysisData.path =
+		asNormalizedPath(
+			dir.isAbsolute ? dir : absolutePath(dir, getcwd())
+		).array;
 
 	static immutable relativePaths = [
 		"databases/"~DB.PersonalDictionary,
