@@ -3,6 +3,7 @@ module gboardforensics.models.dictionary;
 /**
  * This represents a personal dictionary data structure
  */
+@safe pure nothrow
 struct Dictionary
 {
 	/**

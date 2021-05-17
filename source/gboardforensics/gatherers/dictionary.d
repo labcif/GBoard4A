@@ -12,7 +12,7 @@ import d2sqlite3;
 /**
  * This represents a gatherer for GBoard personal dictionaries
  */
-class DictionaryGatherer : IGatherer
+final class DictionaryGatherer : IGatherer
 {
 	/**
 	 * Constructs a gatherer with a given path

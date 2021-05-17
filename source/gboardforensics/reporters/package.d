@@ -17,6 +17,7 @@ abstract class Reporter
 	 * Params:
 	 *   data = analysis data to be reported
 	 */
+	@safe pure nothrow
 	public this(AnalysisData data)
 	{
 		this.data = data;

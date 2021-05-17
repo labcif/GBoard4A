@@ -13,6 +13,9 @@ public {
 	import gboardforensics.analysis.file;
 }
 
+/**
+ * Database types
+ */
 enum DB : string
 {
 	PersonalDictionary = "PersonalDictionary.db",
@@ -20,6 +23,9 @@ enum DB : string
 	Clipboard = "gboard_clipboard.db",
 }
 
+/**
+ * Database version
+ */
 enum DBVERSION
 {
 	Trainingcache2,
@@ -67,6 +73,7 @@ struct AnalysisData
 		this.dictionaries ~= gatherer.dictionary;
 	}
 
+	/// ditto
 	void add(TrainingCacheGatherer gatherer)
 	{
 		this.trainingcache ~= gatherer.trainingcache;
@@ -79,6 +86,7 @@ struct AnalysisData
 
 	/// found dictionaries
 	@serdeIgnoreDefault const(Dictionary)[] dictionaries;
+	/// found training caches
 	@serdeIgnoreDefault const(TrainingCache)[] trainingcache;
 	/// found clipboard
 	@serdeIgnoreDefault const(Clipboard)[] clipboard;
