@@ -74,10 +74,11 @@ struct FileDetector
 			file.seek(0, SEEK_SET);
 
 			// detect file based on it's name
-			switch(baseName(file.name))
+			switch(baseName(file.name)) with(DB)
 			{
-				case DB.PersonalDictionary: return new DictionaryGatherer(file.name);
-				case DB.Trainingcache2: return new TrainingCacheGatherer(file.name, DBVERSION.Trainingcache2);
+				case PersonalDictionary: return new DictionaryGatherer(file.name);
+				case Trainingcache2: return new TrainingCacheGatherer(file.name, DBVERSION.Trainingcache2);
+				case Clipboard: return new ClipboardGatherer(file.name);
 
 				// no detection
 				default: return null;

@@ -3,6 +3,7 @@ module gboardforensics.gatherers;
 public {
 	import gboardforensics.gatherers.dictionary;
 	import gboardforensics.gatherers.trainingcache;
+	import gboardforensics.gatherers.clipboard;
 }
 
 /**

@@ -17,6 +17,7 @@ enum DB : string
 {
 	PersonalDictionary = "PersonalDictionary.db",
 	Trainingcache2 = "trainingcache2.db",
+	Clipboard = "gboard_clipboard.db",
 }
 
 enum DBVERSION
@@ -56,6 +57,7 @@ struct AnalysisData
 		// dynamically detect gatherer type
 		if(ti is typeid(DictionaryGatherer)) add(cast(DictionaryGatherer) gatherer);
 		else if (ti is typeid(TrainingCacheGatherer)) add(cast(TrainingCacheGatherer) gatherer);
+		else if (ti is typeid(ClipboardGatherer)) add(cast(ClipboardGatherer) gatherer);
 		else throw new FailedAnalysisException("Unknown analysis gatherer!");
 	}
 
@@ -70,7 +72,14 @@ struct AnalysisData
 		this.trainingcache ~= gatherer.trainingcache;
 	}
 
+	void add(ClipboardGatherer gatherer)
+	{
+		this.clipboard ~= gatherer.clipboard;
+	}
+
 	/// found dictionaries
 	@serdeIgnoreDefault const(Dictionary)[] dictionaries;
 	@serdeIgnoreDefault const(TrainingCache)[] trainingcache;
+	/// found clipboard
+	@serdeIgnoreDefault const(Clipboard)[] clipboard;
 }
