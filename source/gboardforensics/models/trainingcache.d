@@ -14,6 +14,16 @@ struct TrainingCache
 		size_t timestamp;
 	}
 
+	@safe pure nothrow
+	size_t countItems() const
+	{
+		return inserted.length +
+			deleted.length +
+			rawHistory.length +
+			rawAssembledHistory.length +
+			relevantHistory.length;
+	}
+
 	/// File path
 	immutable string path;
 
@@ -49,4 +59,18 @@ struct TrainingCache
 	---
 	*/
 	const(Info)[] relevantHistory;
+}
+
+///
+@safe pure nothrow
+unittest
+{
+	TrainingCache tc;
+	tc.inserted = new TrainingCache.Info[10];
+	tc.deleted = new TrainingCache.Info[5];
+	tc.rawHistory = new TrainingCache.Info[7];
+	tc.rawAssembledHistory = new TrainingCache.Info[8];
+	tc.relevantHistory = new TrainingCache.Info[1];
+
+	assert(tc.countItems == 31);
 }
