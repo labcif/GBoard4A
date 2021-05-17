@@ -4,6 +4,7 @@ import gboardforensics.analysis;
 
 public {
 	import gboardforensics.reporters.json;
+	import gboardforensics.reporters.html;
 }
 
 /**
