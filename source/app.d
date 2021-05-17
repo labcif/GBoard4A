@@ -6,6 +6,7 @@ import core.stdc.errno;
 import gboardforensics.analysis;
 import gboardforensics.analysis.file;
 import gboardforensics.analysis.datadir;
+import gboardforensics.reporters;
 
 import std.algorithm;
 import std.file;
@@ -16,8 +17,15 @@ import std.typecons;
  */
 @safe pure nothrow @nogc
 struct Options {
+	/// Output Type
+	enum Type {
+		json,
+		html
+	}
+
 	string dataDir; /// Data directory to analyze
 	string[] files; /// list of files to analyze
+	Type type; /// Output type
 	string output; /// Ouput file path of the analysis report
 	bool verbose; /// Print verbose information
 }
@@ -32,6 +40,7 @@ int main(string[] args)
 		args,
 		"d|data-dir", "GBoard data directory to be analyzed", &opt.dataDir,
 		"f|file", "GBoard single file analysis", &opt.files,
+		"t|type", "Output format type (default: json)", &opt.type,
 		"o|output", "Output file path of analysis report", &opt.output,
 		"v|verbose", "Print extra information on the analysis", &opt.verbose
 	);
@@ -75,17 +84,20 @@ int main(string[] args)
 			? dataDirAnalysis(opt.dataDir)
 			: fileAnalysis(opt.files);
 
-		/*
-		generate the output report
-		TODO: this outputs a json report. For now, it's the only supported
-		reporter but support could be added to report other formats.
-		*/
-		import gboardforensics.reporters.json : JsonReporter;
-		auto prettyJson = new JsonReporter(analysisdata).toString();
+		/* generate the output report */
+
+		Reporter reporter;
+		final switch(opt.type) with(Options.Type)
+		{
+			case json: reporter = new JsonReporter(analysisdata); break;
+			case html: reporter = new HTMLReporter(analysisdata); break;
+		}
+
+		auto outputString = reporter.toString();
 
 		// if no --output argument specified, just print to stdout
-		if(!opt.output) writeln(prettyJson);
-		else std.file.write(opt.output, prettyJson);
+		if(!opt.output) writeln(outputString);
+		else std.file.write(opt.output, outputString);
 
 	} catch(FailedAnalysisException e)
 	{

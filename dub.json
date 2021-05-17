@@ -4,7 +4,9 @@
 	"importPaths": ["source"],
 	"targetPath": "bin/",
 	"targetType": "executable",
+	"dflags": ["-J."],
 	"dependencies": {
+		"diet-ng": "~>1.7.5",
 		"d2sqlite3": "~>0.19.1",
 		"asdf": "~>0.7.5"
 	}
