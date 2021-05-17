@@ -16,8 +16,18 @@ import core.thread;
 
 import d2sqlite3;
 
-class TrainingCacheGatherer : IGatherer
+/**
+ * This represents a gatherer for GBoard training cache
+ */
+final class TrainingCacheGatherer : IGatherer
 {
+	/**
+	 * Constructs a gatherer with a given path and database version
+	 *
+	 * Params:
+	 *   path = path to the training cache file
+	 *   dbversion = database version
+	 */
 	this(string path, DBVERSION dbversion)
 		in (path.exists())
 		in (path.isFile())
@@ -26,6 +36,7 @@ class TrainingCacheGatherer : IGatherer
 		_dbversion = dbversion;
 	}
 
+	///
 	void gather()
 	{
 		Database db = Database(_trainingcache.path);
@@ -136,6 +147,10 @@ class TrainingCacheGatherer : IGatherer
 		}
 	}
 
+	/**
+	 * Gets the training cache model
+	 * Returns: training cache model
+	 */
 	@property const(TrainingCache) trainingcache() const
 	{
 		return _trainingcache;

@@ -11,14 +11,27 @@ import gboardforensics.analysis;
 class JsonReporter : Reporter
 {
 	///
+	@safe pure nothrow
 	public this(AnalysisData data)
 	{
 		super(data);
 	}
 
 	///
+	pure
 	public override string toString() const
 	{
 		return data.serializeToJsonPretty!();
 	}
+}
+
+///
+pure
+unittest
+{
+	AnalysisData data;
+	data.path = "foobar";
+
+	auto reporter = new JsonReporter(data);
+	assert(reporter.toString() == "{\n\t\"path\": \"foobar\"\n}");
 }
