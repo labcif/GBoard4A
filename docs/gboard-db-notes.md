@@ -19,7 +19,7 @@ This database is used to store inputs from GBoard. It detects individual key pre
  * **certainty:** NO
 
 #### columns
- * **NAME:** table's name 
+ * **NAME:** table's name
  * **SEQ:** amount of content in the table
 
 
@@ -53,7 +53,6 @@ This database is used to store inputs from GBoard. It detects individual key pre
  * **F2:** global typed sequence
  * **F3:** typed string
  * **F4:** ?
- 
 
 ### TM_TABLE
  * **status:** ON GOING
@@ -67,3 +66,20 @@ This database is used to store inputs from GBoard. It detects individual key pre
  * **F1:** ?
  * **F2:** global typed sequence
  * **F3:** ?
+
+## gboard_clipboard.db (9.4.11.312687073-10.5.03.367007960)
+
+### CLIPS
+ * **status:** ON GOING
+ * **content:** Copied items to the clipboard
+ * **certainty:** YES
+
+#### columns
+ * **_ID:** internal id
+ * **TEXT:** copied text
+ * **HTML_TEXT:** html representation of the copied text
+ * **ITEM_TYPE:** ?
+ * **ENTITY_TYPE:** ?
+ * **TIMESTAMP:** time elapsed since the Unix epoch (ms)
+ * **URI:** uri of the copied document
+ * **GROUP_ID:** ?
