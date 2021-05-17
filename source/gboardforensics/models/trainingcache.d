@@ -19,16 +19,16 @@ struct TrainingCache
 
 
 	/// All keystrokes.
-	Info[] inserted;
+	const(Info)[] inserted;
 
 	/// All deleted sequences.
-	Info[] deleted;
+	const(Info)[] deleted;
 
 	/// All keystrokes pressed and deleted by the order in which they were performed.
-	Info[] rawHistory;
+	const(Info)[] rawHistory;
 
 	/// All information in RawHistory assembled together for easier readability.
-	Info[] rawAssembledHistory;
+	const(Info)[] rawAssembledHistory;
 
 	/**
 	Contains similar information to History but with some sequences removed. The
@@ -49,5 +49,5 @@ struct TrainingCache
 	  this method might be the output 'helllo word'.
 	---
 	*/
-	Info[] relevantHistory;
+	const(Info)[] relevantHistory;
 }

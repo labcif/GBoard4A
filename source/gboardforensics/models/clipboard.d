@@ -38,5 +38,5 @@ struct Clipboard
 	/// path to the dictionary
 	immutable string path;
 	/// list of dictionary entries
-	Entry[] entries;
+	const(Entry)[] entries;
 }

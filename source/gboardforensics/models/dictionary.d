@@ -19,7 +19,7 @@ struct Dictionary
 	}
 
 	/// path to the dictionary
-	string path;
+	immutable string path;
 	/// list of dictionary entries
-	Entry[] entries;
+	const(Entry)[] entries;
 }
