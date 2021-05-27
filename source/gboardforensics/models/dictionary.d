@@ -1,5 +1,7 @@
 module gboardforensics.models.dictionary;
 
+import gboardforensics.utils.serialization;
+
 /**
  * This represents a personal dictionary data structure
  */
@@ -30,10 +32,17 @@ struct Dictionary
 		return entries.length;
 	}
 
+	@safe pure nothrow @nogc
+	this(string path, const(Entry)[] entries)
+	{
+		this.path = path;
+		this.entries = entries;
+	}
+
 	/// path to the dictionary
 	immutable string path;
 	/// list of dictionary entries
-	const(Entry)[] entries;
+	SerializableArray!(const(Entry)) entries;
 }
 
 ///

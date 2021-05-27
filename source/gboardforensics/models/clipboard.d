@@ -1,5 +1,6 @@
 module gboardforensics.models.clipboard;
 
+import gboardforensics.utils.serialization;
 import asdf.serialization;
 
 /**
@@ -38,5 +39,5 @@ struct Clipboard
 	/// path to the dictionary
 	immutable string path;
 	/// list of dictionary entries
-	const(Entry)[] entries;
+	SerializableArray!(const(Entry)) entries;
 }
