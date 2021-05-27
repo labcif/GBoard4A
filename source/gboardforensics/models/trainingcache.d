@@ -1,5 +1,7 @@
 module gboardforensics.models.trainingcache;
 
+import gboardforensics.utils.serialization;
+
 import std.typecons : Nullable;
 
 import asdf.serialization : serdeIgnore, serdeIgnoreDefault;
@@ -28,16 +30,16 @@ struct TrainingCache
 	immutable string path;
 
 	/// All keystrokes.
-	const(Info)[] inserted;
+	SerializableArray!(const(Info)) inserted;
 
 	/// All deleted sequences.
-	const(Info)[] deleted;
+	SerializableArray!(const(Info)) deleted;
 
 	/// All keystrokes pressed and deleted by the order in which they were performed.
-	const(Info)[] historyTimeline;
+	SerializableArray!(const(Info)) historyTimeline;
 
 	/// All information in HistoryTimeline assembled together for easier readability.
-	const(Info)[] assembledTimeline;
+	SerializableArray!(const(Info)) assembledTimeline;
 
 	/**
 	Contains similar information to History but with some sequences removed. The
@@ -58,7 +60,7 @@ struct TrainingCache
 	  this method might be the output 'helllo word'.
 	---
 	*/
-	const(Info)[] processedHistory;
+	SerializableArray!(const(Info)) processedHistory;
 }
 
 ///
