@@ -2,7 +2,7 @@ module gboardforensics.models.trainingcache;
 
 import std.typecons : Nullable;
 
-import mir.serde : serdeIgnore, serdeIgnoreDefault;
+import asdf.serialization : serdeIgnore, serdeIgnoreDefault;
 
 struct TrainingCache
 {
