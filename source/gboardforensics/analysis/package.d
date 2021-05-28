@@ -21,6 +21,7 @@ enum DB : string
 	PersonalDictionary = "PersonalDictionary.db",
 	Trainingcache2 = "trainingcache2.db",
 	Clipboard = "gboard_clipboard.db",
+	ExpressionHistory = "expression-history.db"
 }
 
 /**
@@ -64,6 +65,7 @@ struct AnalysisData
 		if(ti is typeid(DictionaryGatherer)) add(cast(DictionaryGatherer) gatherer);
 		else if (ti is typeid(TrainingCacheGatherer)) add(cast(TrainingCacheGatherer) gatherer);
 		else if (ti is typeid(ClipboardGatherer)) add(cast(ClipboardGatherer) gatherer);
+		else if (ti is typeid(ExpressionHistoryGatherer)) add(cast(ExpressionHistoryGatherer) gatherer);
 		else throw new FailedAnalysisException("Unknown analysis gatherer!");
 	}
 
@@ -79,9 +81,15 @@ struct AnalysisData
 		this.trainingcache ~= gatherer.trainingcache;
 	}
 
+	/// ditto
 	void add(ClipboardGatherer gatherer)
 	{
 		this.clipboard ~= gatherer.clipboard;
+	}
+
+	void add(ExpressionHistoryGatherer gather)
+	{
+		this.expressionHistory ~= gather.expressionHistory;
 	}
 
 	/**
@@ -92,7 +100,8 @@ struct AnalysisData
 	size_t countItems() const
 	{
 		return dictionaries.countItems()
-			+ trainingcache.countItems();
+			+ trainingcache.countItems()
+			+ expressionHistory.countItems();
 	}
 
 	/// analysis path
@@ -104,4 +113,6 @@ struct AnalysisData
 	@serdeIgnoreDefault const(TrainingCache)[] trainingcache;
 	/// found clipboard
 	@serdeIgnoreDefault const(Clipboard)[] clipboard;
+	/// found expression histories
+	@serdeIgnoreDefault const(ExpressionHistory)[] expressionHistory;
 }

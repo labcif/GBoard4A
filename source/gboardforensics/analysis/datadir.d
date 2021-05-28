@@ -28,6 +28,7 @@ AnalysisData dataDirAnalysis(string dir)
 		"databases/"~DB.PersonalDictionary,
 		"databases/"~DB.Trainingcache2,
 		"databases/"~DB.Clipboard,
+		"databases/"~DB.ExpressionHistory,
 	];
 
 	foreach(path; relativePaths)
