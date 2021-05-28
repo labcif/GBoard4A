@@ -83,3 +83,28 @@ This database is used to store inputs from GBoard. It detects individual key pre
  * **TIMESTAMP:** time elapsed since the Unix epoch (ms)
  * **URI:** uri of the copied document
  * **GROUP_ID:** ?
+
+## expression-history.db (10.0.02.338070508-10.5.03.367007960)
+
+### EMOJI_SHARES
+ * **status:** ON GOING
+ * **content:** List of emojis shared
+ * **certainty:** YES
+
+#### columns
+ * **EMOJI:** text representation of the emoji
+ * **BASE_VARIANT_EMOJI:** text representation of the base emoji
+ * **TRUNCATED_TIMESTAMP_MILLIS:** ?
+ * **LAST_EVENT_MILLIS:** last timestamp this emoji was used since the Unix epoch (ms)
+ * **SHARES:** number of times this emoji was shared
+
+### EMOTICON_SHARES
+ * **status:** COMPLETED
+ * **content:** List of emoticons shared
+ * **certainty:** YES
+
+#### columns
+ * **EMOTICON:** text representation of the emoticon
+ * **TRUNCATED_TIMESTAMP_MILLIS:** ?
+ * **LAST_EVENT_MILLIS:** last timestamp this emoticon was used since the Unix epoch (ms)
+ * **SHARES:** number of times this emoticon was shared
