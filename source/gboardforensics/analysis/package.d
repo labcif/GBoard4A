@@ -101,6 +101,7 @@ struct AnalysisData
 	{
 		return dictionaries.countItems()
 			+ trainingcache.countItems()
+			+ clipboard.countItems()
 			+ expressionHistory.countItems();
 	}
 

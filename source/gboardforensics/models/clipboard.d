@@ -36,8 +36,29 @@ struct Clipboard
 		@serdeIgnoreDefault string uri;
 	}
 
+	/**
+	 * Calculates the number of total clipboard entries
+	 *
+	 * Returns: number of total items
+	 */
+	@safe pure nothrow
+	size_t countItems() const
+	{
+		return entries.length;
+	}
+
 	/// path to the dictionary
 	immutable string path;
 	/// list of dictionary entries
 	SerializableArray!(const(Entry)) entries;
+}
+
+///
+@safe pure nothrow
+unittest
+{
+	Clipboard c;
+	c.entries = new Clipboard.Entry[10];
+
+	assert(c.countItems == 10);
 }
