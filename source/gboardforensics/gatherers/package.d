@@ -4,6 +4,7 @@ public {
 	import gboardforensics.gatherers.dictionary;
 	import gboardforensics.gatherers.trainingcache;
 	import gboardforensics.gatherers.clipboard;
+	import gboardforensics.gatherers.expressionhistory;
 }
 
 /**

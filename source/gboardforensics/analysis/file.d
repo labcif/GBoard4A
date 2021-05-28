@@ -79,6 +79,7 @@ struct FileDetector
 				case PersonalDictionary: return new DictionaryGatherer(file.name);
 				case Trainingcache2: return new TrainingCacheGatherer(file.name, DBVERSION.Trainingcache2);
 				case Clipboard: return new ClipboardGatherer(file.name);
+				case ExpressionHistory: return new ExpressionHistoryGatherer(file.name);
 
 				// no detection
 				default: return null;
