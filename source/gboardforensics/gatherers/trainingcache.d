@@ -106,19 +106,19 @@ final class TrainingCacheGatherer : IGatherer
 				)
 				ORDER BY 1, 2";
 
-			// raw history
-			_trainingcache.rawHistory = db.execute(format!"
+			// history timeline
+			_trainingcache.historyTimeline = db.execute(format!"
 				SELECT time, sequence, deleted, _timestamp FROM (%s)"(historyQuery))
 			.map!(r => r.as!(TrainingCache.Info)).array;
 
-			// assembled raw history
-			_trainingcache.rawAssembledHistory = db.execute(format!"
+			// assembled timeline
+			_trainingcache.assembledTimeline = db.execute(format!"
 				SELECT time, group_concat(sequence, '') as sequence, deleted, _timestamp
 				FROM (%s) GROUP BY time, deleted"(historyQuery))
 			.map!(r => r.as!(TrainingCache.Info)).array;
 
-			// relevant history
-			_trainingcache.relevantHistory = db.execute("
+			// processed history
+			_trainingcache.processedHistory = db.execute("
 				SELECT time, group_concat(sequence, '') as sequence, _timestamp
 				FROM (
 					SELECT datetime(_timestamp/1000, 'unixepoch') as time, _timestamp, group_concat(f3, '') as sequence

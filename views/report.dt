@@ -83,7 +83,7 @@ html(lang="en")
 						thead
 							tr
 								th(scope='row') Name
-								th(scope='row') Status
+								th(scope='row') Present
 						tbody
 							tr
 								th(scope='row') Clipboard
@@ -108,7 +108,7 @@ html(lang="en")
 			-if(!data.trainingcache.empty)
 				.row
 					.col
-						h5.mb-3.mt-3 Relevant History
+						h5.mb-3.mt-3 Processed History
 						.table-responsive.table-responsive-vertical
 							table.table.table-sm.table-striped
 								thead
@@ -118,14 +118,14 @@ html(lang="en")
 								tbody
 									- import std.algorithm.iteration : map;
 									- import std.array : join;
-									- foreach (entry; data.trainingcache.map!(t => t.relevantHistory).join)
+									- foreach (entry; data.trainingcache.map!(t => t.processedHistory).join)
 										tr
 											td= entry.time
 											td= entry.sequence
 
 				.row
 					.col
-						h5.mb-3.mt-3 Raw History
+						h5.mb-3.mt-3 History Timeline
 						.table-responsive.table-responsive-vertical
 							table.table.table-sm.table-striped
 								thead
@@ -136,7 +136,7 @@ html(lang="en")
 								tbody
 									- import std.algorithm.iteration : map;
 									- import std.array : join;
-									- foreach (entry; data.trainingcache.map!(t => t.rawHistory).join)
+									- foreach (entry; data.trainingcache.map!(t => t.historyTimeline).join)
 										tr
 											td= entry.time
 											td
@@ -146,7 +146,7 @@ html(lang="en")
 													i.fas.fa-plus.text-success
 											td= entry.sequence
 					.col
-						h5.mb-3.mt-3 Raw Assembled History
+						h5.mb-3.mt-3 Assembled Timeline
 						.table-responsive.table-responsive-vertical
 							table.table.table-sm.table-striped
 								thead
@@ -157,7 +157,7 @@ html(lang="en")
 								tbody
 									- import std.algorithm.iteration : map;
 									- import std.array : join;
-									- foreach (entry; data.trainingcache.map!(t => t.rawAssembledHistory).join)
+									- foreach (entry; data.trainingcache.map!(t => t.assembledTimeline).join)
 										tr
 											td= entry.time
 											td
