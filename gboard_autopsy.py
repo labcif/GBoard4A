@@ -47,9 +47,9 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
     GBOARD_DICTIONARY_SHORTCUT_ATTRIBUTE = 'GBOARD_DICTIONARY_SHORTCUT_OBJECT'
     GBOARD_DICTIONARY_LOCALE_ATTRIBUTE = 'GBOARD_DICTIONARY_LOCALE_OBJECT'
 
-    GBOARD_TC_RAW_HISTORY_ARTIFACT = 'GBOARD_TC_RAW_HISTORY_OBJECT'
-    GBOARD_TC_RAW_AHISTORY_ARTIFACT = 'GBOARD_TC_RAW_AHISTORY_OBJECT'
-    GBOARD_TC_RELEVANT_HISTORY_ARTIFACT = 'GBOARD_TC_RELEVANT_HISTORY_OBJECT'
+    GBOARD_TC_HISTORY_TIMELINE_ARTIFACT = 'GBOARD_TC_HISTORY_TIMELINE_OBJECT'
+    GBOARD_TC_RAW_ASSEMBLED_TIMELINE_ARTIFACT = 'GBOARD_TC_RAW_ASSEMBLED_TIMELINE_OBJECT'
+    GBOARD_TC_PROCESSED_HISTORY_ARTIFACT = 'GBOARD_TC_PROCESSED_HISTORY_OBJECT'
 
     GBOARD_TC_DELETE_FLAG_ATTRIBUTE = 'GBOARD_TC_DELETE_FLAG_OBJECT'
 
@@ -86,9 +86,9 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
             # create artifacts
             self.dictionary_art_type = self.createCustomArtifactType(current_case, self.GBOARD_DICTIONARY_ARTIFACT, 'Gboard Dictionary')
-            self.tc_raw_history_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RAW_HISTORY_ARTIFACT, 'Gboard Raw History')
-            self.tc_raw_ahistory_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RAW_AHISTORY_ARTIFACT, 'Gboard Raw Assembled History')
-            self.tc_relevant_history_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RELEVANT_HISTORY_ARTIFACT, 'Gboard Relevant History')
+            self.tc_history_timeline_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_HISTORY_TIMELINE_ARTIFACT, 'Gboard History Timeline')
+            self.tc_raw_assembled_timeline_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RAW_ASSEMBLED_TIMELINE_ARTIFACT, 'Gboard Assembled Timeline')
+            self.tc_processed_history_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_PROCESSED_HISTORY_ARTIFACT, 'Gboard Processed History')
 
             # training cache attributes
             self.tc_delete_flag_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TC_DELETE_FLAG_ATTRIBUTE, 'Deleted?')
@@ -259,13 +259,13 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
         for trainingcache in analysis_output['trainingcache']:
             file = self.get_common_sufix_file(data_source, file_manager, input_dir, trainingcache['path'])
             # process raw histories
-            for entry in trainingcache['rawHistory']:
-                self.publish_raw_history_artifact(blackboard, file, entry, self.tc_raw_history_art_type)
-            for entry in trainingcache['rawAssembledHistory']:
-                self.publish_raw_history_artifact(blackboard, file, entry, self.tc_raw_ahistory_art_type)
+            for entry in trainingcache['historyTimeline']:
+                self.publish_raw_history_artifact(blackboard, file, entry, self.tc_history_timeline_art_type)
+            for entry in trainingcache['assembledTimeline']:
+                self.publish_raw_history_artifact(blackboard, file, entry, self.tc_raw_assembled_timeline_art_type)
             # process relevant histories
-            for entry in trainingcache['relevantHistory']:
-                self.publish_analysis_artifact(blackboard, file, self.tc_relevant_history_art_type, [
+            for entry in trainingcache['processedHistory']:
+                self.publish_analysis_artifact(blackboard, file, self.tc_processed_history_art_type, [
                     (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp']),
                     (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, entry['sequence']),
                 ])

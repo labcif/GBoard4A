@@ -19,9 +19,9 @@ struct TrainingCache
 	{
 		return inserted.length +
 			deleted.length +
-			rawHistory.length +
-			rawAssembledHistory.length +
-			relevantHistory.length;
+			historyTimeline.length +
+			assembledTimeline.length +
+			processedHistory.length;
 	}
 
 	/// File path
@@ -34,10 +34,10 @@ struct TrainingCache
 	const(Info)[] deleted;
 
 	/// All keystrokes pressed and deleted by the order in which they were performed.
-	const(Info)[] rawHistory;
+	const(Info)[] historyTimeline;
 
-	/// All information in RawHistory assembled together for easier readability.
-	const(Info)[] rawAssembledHistory;
+	/// All information in HistoryTimeline assembled together for easier readability.
+	const(Info)[] assembledTimeline;
 
 	/**
 	Contains similar information to History but with some sequences removed. The
@@ -58,7 +58,7 @@ struct TrainingCache
 	  this method might be the output 'helllo word'.
 	---
 	*/
-	const(Info)[] relevantHistory;
+	const(Info)[] processedHistory;
 }
 
 ///
@@ -68,9 +68,9 @@ unittest
 	TrainingCache tc;
 	tc.inserted = new TrainingCache.Info[10];
 	tc.deleted = new TrainingCache.Info[5];
-	tc.rawHistory = new TrainingCache.Info[7];
-	tc.rawAssembledHistory = new TrainingCache.Info[8];
-	tc.relevantHistory = new TrainingCache.Info[1];
+	tc.historyTimeline = new TrainingCache.Info[7];
+	tc.assembledTimeline = new TrainingCache.Info[8];
+	tc.processedHistory = new TrainingCache.Info[1];
 
 	assert(tc.countItems == 31);
 }
