@@ -23,8 +23,9 @@ struct Options {
 		html
 	}
 
-	string dataDir; /// Data directory to analyze
-	string[] files; /// list of files to analyze
+	string rootDir; /// Root directory
+	string[] dirs; /// Directories
+	string[] files; /// Files
 	Type type; /// Output type
 	string output; /// Ouput file path of the analysis report
 	bool verbose; /// Print verbose information
@@ -38,8 +39,9 @@ int main(string[] args)
 	import std.getopt : getopt, defaultGetoptPrinter;
 	auto helpInfo = getopt(
 		args,
-		"d|data-dir", "GBoard data directory to be analyzed", &opt.dataDir,
-		"f|file", "GBoard single file analysis", &opt.files,
+		"r|root-dir", "GBoard root directory analysis", &opt.rootDir,
+		"d|dir", "GBoard directory analysis", &opt.dirs,
+		"f|file", "GBoard file analysis", &opt.files,
 		"t|type", "Output format type (default: json)", &opt.type,
 		"o|output", "Output file path of analysis report", &opt.output,
 		"v|verbose", "Print extra information on the analysis", &opt.verbose
@@ -55,11 +57,11 @@ int main(string[] args)
 		return 0;
 	}
 
-	// if --data-dir and --file both or none specified
-	if((opt.dataDir && opt.files.length) || (!opt.dataDir && !opt.files.length))
+	// if --root-dir and --file both or none specified
+	if((opt.rootDir && opt.files.length) || (!opt.rootDir && !opt.files.length))
 	{
 		defaultGetoptPrinter(
-			"Please specify a data dir or a file!\n",
+			"Please specify a root directory or a file!\n",
 			helpInfo.options
 		);
 		return EINVAL;
@@ -80,8 +82,8 @@ int main(string[] args)
 
 	// run the analysis based on the passed arguments
 	try {
-		analysisdata = (opt.dataDir)
-			? dataDirAnalysis(opt.dataDir)
+		analysisdata = (opt.rootDir)
+			? rootDirAnalysis(opt.rootDir)
 			: fileAnalysis(opt.files);
 
 		/* generate the output report */
