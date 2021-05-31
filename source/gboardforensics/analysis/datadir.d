@@ -9,14 +9,14 @@ import std.format;
 import std.array;
 
 /**
- * Performs a full data directory analysis
+ * Performs a full GBoard analysis
  *
  * Params:
- *   dir = GBoard data directory
+ *   dir = GBoard root directory
  *
  * Returns: gathered analysis data
  */
-AnalysisData dataDirAnalysis(string dir)
+AnalysisData rootDirAnalysis(string dir)
 {
 	AnalysisData analysisData;
 	analysisData.path =
