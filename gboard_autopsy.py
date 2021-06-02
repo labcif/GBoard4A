@@ -219,7 +219,7 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
     def generate_analyzer_args(self, input_dir):
         return [
             self.path_to_exe,
-            '-d', input_dir,
+            '-r', input_dir,
         ]
 
     def get_input_dir(self, data_source, file_manager):
@@ -305,5 +305,5 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
         try:
             # index the artifact for keyword search
             blackboard.indexArtifact(artifact)
-        except Blackboard.BlackboardException as ex:
+        except Blackboard.BlackboardException:
             self.log(Level.SEVERE, "Error indexing artifact " + artifact.getDisplayName())

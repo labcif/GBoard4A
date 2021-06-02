@@ -19,24 +19,44 @@ import std.array;
 AnalysisData rootDirAnalysis(string dir)
 {
 	AnalysisData analysisData;
-	analysisData.path =
+	analysisData.rootPath =
 		asNormalizedPath(
 			dir.isAbsolute ? dir : absolutePath(dir, getcwd())
 		).array;
 
-	static immutable relativePaths = [
-		"databases/"~DB.PersonalDictionary,
-		"databases/"~DB.Trainingcache2,
-		"databases/"~DB.Clipboard,
-		"databases/"~DB.ExpressionHistory,
+	  // ===========
+	 // File caches
+	// ===========
+
+	static immutable filePaths = [
+		buildPath("databases", DB.PersonalDictionary),
+		buildPath("databases", DB.Trainingcache2),
+		buildPath("databases", DB.Clipboard),
+		buildPath("databases", DB.ExpressionHistory),
 	];
 
-	foreach(path; relativePaths)
+	foreach(path; filePaths)
 	{
 		auto file = buildPath(dir, path);
 		if(!exists(file)) continue;
 
 		analysisData.add(FileDetector(file).detect());
+	}
+
+	  // ============
+	 // Other caches
+	// ============
+
+	static immutable dirPaths = [
+		buildPath("cache", "translate_cache"),
+	];
+
+	foreach(path; dirPaths)
+	{
+		auto d = buildPath(dir, path);
+		if(!d.exists()) continue;
+
+		analysisData.add(DirDetector(d).detect());
 	}
 
 	return analysisData;

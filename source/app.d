@@ -4,12 +4,11 @@ import std.path;
 import core.stdc.errno;
 
 import gboardforensics.analysis;
-import gboardforensics.analysis.file;
-import gboardforensics.analysis.datadir;
 import gboardforensics.reporters;
 
 import std.algorithm;
 import std.file;
+import std.range;
 import std.typecons;
 
 /**
@@ -39,7 +38,7 @@ int main(string[] args)
 	import std.getopt : getopt, defaultGetoptPrinter;
 	auto helpInfo = getopt(
 		args,
-		"r|root-dir", "GBoard root directory analysis", &opt.rootDir,
+		"r|root-dir", "GBoard root directory analysis (must be used alone)", &opt.rootDir,
 		"d|dir", "GBoard directory analysis", &opt.dirs,
 		"f|file", "GBoard file analysis", &opt.files,
 		"t|type", "Output format type (default: json)", &opt.type,
@@ -57,11 +56,21 @@ int main(string[] args)
 		return 0;
 	}
 
-	// if --root-dir and --file both or none specified
-	if((opt.rootDir && opt.files.length) || (!opt.rootDir && !opt.files.length))
+	// if --root-dir is specified it must be alone
+	if (opt.rootDir.length && only(opt.dirs.length, opt.files.length).any!"a > 0")
 	{
 		defaultGetoptPrinter(
-			"Please specify a root directory or a file!\n",
+			"Cannot analyse multiple paths when --root-dir is specified!\n",
+			helpInfo.options
+		);
+		return EINVAL;
+	}
+
+	// if none --root-dir, --dir, --file are specified
+	if(!opt.rootDir.length && !only(opt.dirs.length, opt.files.length).any!"a > 0")
+	{
+		defaultGetoptPrinter(
+			"Please specify a root path, a directory or a file!\n",
 			helpInfo.options
 		);
 		return EINVAL;
@@ -74,20 +83,29 @@ int main(string[] args)
 		return ENOENT;
 	}
 
-	if (opt.files.length > 0 && opt.files.any!(f => !f.exists()))
+	if (opt.files.length && opt.files.any!(f => !f.exists()))
 	{
 		stderr.writefln!"One or more files specified [%-('%s', %)] do not exist!"(opt.files.filter!(f => !f.exists()));
 		return ENOENT;
 	}
 
+	if (opt.dirs.length && opt.dirs.any!(d => !d.exists()))
+	{
+		stderr.writefln!"One or more directories specified [%-('%s', %)] do not exist!"(opt.dirs.filter!(d => !d.exists()));
+		return ENOENT;
+	}
+
 	// run the analysis based on the passed arguments
 	try {
-		analysisdata = (opt.rootDir)
-			? rootDirAnalysis(opt.rootDir)
-			: fileAnalysis(opt.files);
+		if (opt.rootDir)
+			analysisdata = rootDirAnalysis(opt.rootDir);
+		else
+		{
+			if (opt.files) analysisdata = fileAnalysis(opt.files);
+			if (opt.dirs) analysisdata ~= dirAnalysis(opt.dirs);
+		}
 
 		/* generate the output report */
-
 		Reporter reporter;
 		final switch(opt.type) with(Options.Type)
 		{

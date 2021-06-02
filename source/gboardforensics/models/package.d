@@ -6,6 +6,7 @@ public
 	import gboardforensics.models.trainingcache;
 	import gboardforensics.models.clipboard;
 	import gboardforensics.models.expressionhistory;
+	import gboardforensics.models.translatecache;
 }
 
 import std.traits : ReturnType;
