@@ -73,7 +73,7 @@ html(lang="en")
 								td= todayDate
 							tr
 								th(scope='row') Path
-								td= data.path
+								td= data.rootPath
 							tr
 								th(scope='row') Items Found
 								td= data.countItems()
