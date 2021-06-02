@@ -8,6 +8,8 @@
 	"dependencies": {
 		"diet-ng": "~>1.7.5",
 		"d2sqlite3": "~>0.19.1",
-		"asdf": "~>0.7.5"
+		"asdf": "~>0.7.5",
+		"vibe-d:textfilter": "~>0.9.4-beta.2",
+		"vibe-d:inet": "~>0.9.4-beta.2"
 	}
 }
