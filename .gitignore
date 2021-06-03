@@ -11,3 +11,6 @@ gboard-forensics
 
 # Jython output files
 *.class
+
+# D .lst unittest artifacts
+*.lst
