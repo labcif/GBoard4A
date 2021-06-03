@@ -30,8 +30,8 @@ pure
 unittest
 {
 	AnalysisData data;
-	data.path = "foobar";
+	data.rootPath = "foobar";
 
 	auto reporter = new JsonReporter(data);
-	assert(reporter.toString() == "{\n\t\"path\": \"foobar\"\n}");
+	assert(reporter.toString() == "{\n\t\"rootPath\": \"foobar\"\n}");
 }
