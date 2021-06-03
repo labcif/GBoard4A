@@ -34,7 +34,12 @@ jobs:
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/dlang-community/d2sqlite3/master/lib/win64/sqlite3.lib -OutFile ${{ github.workspace }}\sqlite3.lib
 
       - name: Run tests
-        run: dub test --build=cov
+        run: |
+          # Test in release mode
+          dub test --build=release
+          # Coverage
+          dub test --build=cov
+          dub test --build=unittest-cov
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
