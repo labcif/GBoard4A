@@ -1,0 +1,51 @@
+- import std.format : format;
+- import std.array : split;
+- import std.range : front, back;
+
+//- libraries versions
+- static immutable BOOTSTRAP_CSS_VERSION = "5.0.1;sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x";
+- static immutable FONTAWESOME_CSS_VERSION = "5.15.3;sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=";
+- static immutable FLAGICON_CSS_VERSION ="3.5.0;sha256-0n6YDYIexWJmHyTKtRRHTXvoanQrXpFfpsfv0h53qvk=";
+
+//- page metadata
+meta(charset="utf-8")
+meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
+
+//- load bootstrap styles
+link(
+	rel="stylesheet",
+	href=format!"https://cdn.jsdelivr.net/npm/bootstrap@%s/dist/css/bootstrap.min.css"(BOOTSTRAP_CSS_VERSION.split(";").front),
+	integrity=BOOTSTRAP_CSS_VERSION.split(";").back,
+	crossorigin="anonymous"
+)
+//- load fontawesome styles
+link(
+	rel="stylesheet",
+	href=format!"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@%s/css/all.min.css"(FONTAWESOME_CSS_VERSION.split(";").front),
+	integrity=FONTAWESOME_CSS_VERSION.split(";").back,
+	crossorigin="anonymous"
+)
+
+//- load flag-icon styles
+link(
+	rel="stylesheet",
+	href=format!"https://cdn.jsdelivr.net/npm/flag-icon-css@%s/css/flag-icon.min.css"(FLAGICON_CSS_VERSION.split(";").front),
+	integrity=FLAGICON_CSS_VERSION.split(";").back,
+	crossorigin="anonymous"
+)
+
+//- custom style
+style.
+	.table-responsive-vertical { max-height:300px; }
+	.print-icon { display: inline; }
+
+	.table-time-w {
+		width: 170px;
+	}
+
+	@media print {
+		.table-responsive-vertical { max-height: none; }
+		.table-responsive { max-width: none; }
+		.print-icon { display: none; }
+		.disable-on-print { display: none; }
+	}
