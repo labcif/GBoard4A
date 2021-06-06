@@ -59,6 +59,7 @@ private:
 		import std.json : parseJSON;
 		import std.string : startsWith;
 		import std.zlib : UnCompress;
+		import std.uni : toLower;
 
 		import vibe.textfilter.urlencode : urlDecode;
 		import vibe.inet.url : URL;
@@ -69,8 +70,10 @@ private:
 		// get the response base on the enconding
 		// defaults to plain text
 		string response;
+		import std.stdio : writeln;
+		writeln(lines);
 		switch (lines
-			.filter!(s => s.startsWith("Content-Encoding:"))
+			.filter!(s => s.toLower.startsWith("content-encoding:"))
 			.front // extract the string from the range
 			.split // split by white characters
 			.back // get the last value
@@ -101,7 +104,7 @@ private:
 		data.requestURL = lines.front;
 
 		data.time = lines
-			.filter!(s => s.startsWith("Date:"))
+			.filter!(s => s.toLower.startsWith("date:"))
 			.front
 			.findSplitAfter(", ")[1]
 			.findSplitBefore(" GMT")[0];
