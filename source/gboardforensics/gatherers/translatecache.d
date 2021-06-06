@@ -70,8 +70,7 @@ private:
 		// get the response base on the enconding
 		// defaults to plain text
 		string response;
-		import std.stdio : writeln;
-		writeln(lines);
+
 		switch (lines
 			.filter!(s => s.toLower.startsWith("content-encoding:"))
 			.front // extract the string from the range
