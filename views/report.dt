@@ -3,52 +3,26 @@
 - import std.range : front, back;
 - import std.datetime : Clock, UTC;
 - import std.base64 : Base64;
+- import std.algorithm.iteration : map, sum;
+- import std.array : join;
 
-//- libraries versions
-- static immutable BOOTSTRAP_CSS_VERSION = "5.0.1;sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x";
-- static immutable BOOTSTRAP_JS_VERSION = "5.0.1;sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4";
-- static immutable CHART_JS_VERSION = "3.2.1;sha256-uVEHWRIr846/vAdLJeybWxjPNStREzOlqLMXjW/Saeo=";
-- static immutable FONTAWESOME_CSS_VERSION = "5.15.3;sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=";
+- import vibe.textfilter.html : htmlEscape;
+
+- import gboardforensics.models.clipboard;
 
 //- constants and immutable values
-- static immutable PAGE_TITLE = "GBoard Forensic Analysis Report";
 - immutable curTime = Clock.currTime(UTC());
 - immutable todayDate = curTime.toSimpleString();
+
+include parts/utils
 
 doctype html
 html(lang="en")
 	head
+		- static immutable PAGE_TITLE = "GBoard Forensic Analysis Report";
 		title #{format!"%s - %s"(PAGE_TITLE, todayDate)}
 
-		//- page metadata
-		meta(charset="utf-8")
-		meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-
-		//- load bootstrap styles
-		link(
-			rel="stylesheet",
-			href=format!"https://cdn.jsdelivr.net/npm/bootstrap@%s/dist/css/bootstrap.min.css"(BOOTSTRAP_CSS_VERSION.split(";").front),
-			integrity=BOOTSTRAP_CSS_VERSION.split(";").back,
-			crossorigin="anonymous"
-		)
-		//- load fontawesome styles
-		link(
-			rel="stylesheet",
-			href=format!"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@%s/css/all.min.css"(FONTAWESOME_CSS_VERSION.split(";").front),
-			integrity=FONTAWESOME_CSS_VERSION.split(";").back,
-			crossorigin="anonymous"
-		)
-
-		//- custom style
-		style.
-			.table-responsive-vertical { max-height:300px; }
-			.print-icon { display: inline; }
-
-			@media print {
-				.table-responsive-vertical { max-height: none; }
-				.table-responsive { max-width: none; }
-				.print-icon { display: none; }
-			}
+		include parts/head
 	body
 		nav.navbar.navbar-light.bg-light.navbar-expand-lg
 			.container-fluid
@@ -79,6 +53,12 @@ html(lang="en")
 								td= data.countItems()
 				.col
 					h5.mb-3 Application Capability
+						span.m-1.fs-6.disable-on-print
+							i.far.fa-question-circle.text-secondary(
+								data-bs-toggle="tooltip",
+								data-bs-placement="bottom",
+								title="Supported capabilities by the current analyzed GBoard version"
+							)
 					table.table
 						thead
 							tr
@@ -88,102 +68,476 @@ html(lang="en")
 							tr
 								th(scope='row') Clipboard
 								td
-									i.fas.fa-times-circle.text-danger
+									- statusIcon(data.clipboard);
 							tr
 								th(scope='row') Personal Dictionary
 								td
-									i.fas(
-										class= data.dictionaries ? "fa-check-circle text-success" : "fa-times-circle text-danger"
-									)
+									- statusIcon(data.dictionaries);
 							tr
 								th(scope='row') Translation Cache
 								td
-									i.fas.fa-times-circle.text-danger
+									- statusIcon(data.translateCache);
 							tr
 								th(scope='row') Training Cache
 								td
-									i.fas(
-										class= data.trainingcache ? "fa-check-circle text-success" : "fa-times-circle text-danger"
-									)
-			-if(!data.trainingcache.empty)
+									- statusIcon(data.trainingcache);
+							tr
+								th(scope='row') Expression History
+								td
+									- statusIcon(data.expressionHistory);
+			.row
+				h4.mt-3 Timeline
+				div#timeline-chart
+
+			-if(data.dictionaries.length > 0)
+				h4.mt-3 Personal Dictionary
 				.row
 					.col
-						h5.mb-3.mt-3 Processed History
-						.table-responsive.table-responsive-vertical
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Entries
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="Personal dictionary with shortcuts for certain words"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('personaldict-table')")
+						.table-responsive.table-responsive-vertical#personaldict-table
 							table.table.table-sm.table-striped
 								thead
 									tr.table-dark
-										th(scope='row') Time
+										th(scope='row') Word
+										th(scope='row') Shortcut
+										th(scope='row') Locale
+								tbody
+									-if(data.dictionaries.map!(d => d.countItems).sum > 0)
+										- foreach (entry; data.dictionaries.map!(t => t.entries).join)
+											tr
+												td= entry.word
+												td= entry.shortcut
+												td= entry.locale
+									-else
+										tr
+											td(align="center", colspan="3")
+												p.text-center.text-secondary No data
+			-if(data.clipboard.length > 0)
+				h4.mt-3 Clipboard
+				.row
+					.col
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Entries
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="Everything copy and pasted managed by the GBoard clipboard background service"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('clipboard-table')")
+						.table-responsive.table-responsive-vertical#clipboard-table
+							table.table.table-sm.table-striped
+								thead
+									tr.table-dark
+										th.table-time-w(scope='row') Time
+										th(scope='row') Type
+										th(scope='row') Content
+								tbody
+									-if(data.clipboard.map!(d => d.countItems).sum > 0)
+										- foreach (entry; data.clipboard.map!(t => t.entries).join)
+											tr
+												td= entry.time
+												td
+													i.fas(
+														class= entry.type == Clipboard.Entry.Type.TEXT ? "fas fa-font text-info" : "fas fa-file-alt text-warning"
+													)
+												td
+													-if(entry.type == Clipboard.Entry.Type.TEXT)
+														=entry.html ? htmlEscape(entry.html) : entry.text
+													-else
+														a(href="data:application/octet-stream;base64," ~ entry.document, target="_blank", download="clipboard_document") Open content
+
+									-else
+										tr
+											td(align="center", colspan="3")
+												p.text-center.text-secondary No data
+			-if(data.trainingcache.map!(d => d.countItems).sum > 0)
+				h4.mt-3 Training Cache
+				.row
+					.col
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Processed History
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="History processed with the added and deleted words by its order"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('processedhistory-table')")
+						.table-responsive.table-responsive-vertical#processedhistory-table
+							table.table.table-sm.table-striped
+								thead
+									tr.table-dark
+										th.table-time-w(scope='row') Time
 										th(scope='row') Sequence
 								tbody
-									- import std.algorithm.iteration : map;
-									- import std.array : join;
 									- foreach (entry; data.trainingcache.map!(t => t.processedHistory).join)
 										tr
 											td= entry.time
 											td= entry.sequence
-
 				.row
 					.col
-						h5.mb-3.mt-3 History Timeline
-						.table-responsive.table-responsive-vertical
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 History Timeline
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="History of added and deleted sequences ordered"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('historytimeline-table')")
+						.table-responsive.table-responsive-vertical#historytimeline-table
 							table.table.table-sm.table-striped
 								thead
 									tr.table-dark
-										th(scope='row') Time
-										th(scope='row') Type
+										th.table-time-w(scope='row') Time
+										th.text-center(scope='row') Type
 										th(scope='row') Sequence
 								tbody
-									- import std.algorithm.iteration : map;
-									- import std.array : join;
 									- foreach (entry; data.trainingcache.map!(t => t.historyTimeline).join)
 										tr
 											td= entry.time
-											td
+											td.text-center
 												-if(!entry.deleted.isNull && entry.deleted.get())
 													i.fas.fa-minus.text-danger
 												-else
 													i.fas.fa-plus.text-success
 											td= entry.sequence
 					.col
-						h5.mb-3.mt-3 Assembled Timeline
-						.table-responsive.table-responsive-vertical
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Assembled Timeline
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="History of added and deleted sequences ordered and assembled together"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('assembledtimeline-table')")
+						.table-responsive.table-responsive-vertical#assembledtimeline-table
 							table.table.table-sm.table-striped
 								thead
 									tr.table-dark
-										th(scope='row') Time
-										th(scope='row') Type
+										th.table-time-w(scope='row') Time
+										th.text-center(scope='row') Type
 										th(scope='row') Sequence
 								tbody
-									- import std.algorithm.iteration : map;
-									- import std.array : join;
 									- foreach (entry; data.trainingcache.map!(t => t.assembledTimeline).join)
 										tr
 											td= entry.time
-											td
+											td.text-center
 												-if(!entry.deleted.isNull && entry.deleted.get())
 													i.fas.fa-minus.text-danger
 												-else
 													i.fas.fa-plus.text-success
 											td= entry.sequence
 
-					//h5.mb-3 Activity
-					//canvas#activity-chart
+			-if(data.translateCache.map!(d => d.countItems).sum > 0)
+				h4.mt-3 Translation Cache
+				.row
+					.col
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Entries
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="Translation data used with GBoard translation capability"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('translationcache-table')")
+						.table-responsive.table-responsive-vertical#translationcache-table
+							table.table.table-sm.table-striped
+								thead
+									tr.table-dark
+										th.table-time-w(scope='row') Time
+										th(scope='row') From
+										th(scope='row') To
+										th(scope='row') Original
+										th(scope='row') Translated
+										th(scope='row') Raw
+								tbody
+									- foreach (entry; data.translateCache.map!(t => t.data).join)
+										tr
+											td= entry.time
+											td
+												span(class="flag-icon flag-icon-" ~ entry.from)
+												div= entry.from
+											td
+												span(class="flag-icon flag-icon-" ~ entry.to)
+												div= entry.to
+											td= entry.orig
+											td= entry.trans
+											td
+												a(href="data:text/plain;base64," ~ entry.rawRequest) Request
+												|
+												a(href="data:text/plain;base64," ~ entry.rawResponse) Response
+
+			-if(data.expressionHistory.map!(d => d.countItems).sum > 0)
+				h4.mt-3 Expression History
+				.row
+					.col-md-auto
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Expression Usage
+									span.m-1.fs-6.disable-on-print
+										i.far.fa-question-circle.text-secondary(
+											data-bs-toggle="tooltip",
+											data-bs-placement="bottom",
+											title="Number of emojis and emoticons used"
+										)
+							.col.disable-on-print
+								.d-flex.flex-row-reverse
+									button.btn.btn-sm(type="button")
+										i.fas.fa-expand-arrows-alt(onclick="openElementInNewWindow('expressionusage-table')")
+						.table-responsive.table-responsive-vertical#expressionusage-table
+							table.table.table-sm.table-striped
+								thead
+									tr.table-dark
+										th.table-time-w(scope='row') Last Usage
+										th.text-center(scope='row') Emoji
+										th(scope='row') Shares
+								tbody
+									- foreach (entry; data.expressionHistory.map!(e => e.emojis).join)
+										tr
+											td= entry.lastTime
+											td= entry.emoji
+											td= entry.shares
+									- foreach (entry; data.expressionHistory.map!(e => e.emoticons).join)
+										tr
+											td= entry.lastTime
+											td= entry.emoticon
+											td= entry.shares
+					.col
+						.row.mb-3.mt-3
+							.col-md-auto
+								h5 Chart
+						div#expressionhistory-chart
 
 			footer.pt-5.my-5.text-muted.border-top
 				| Created by GBoard Forensics · © #{curTime.year}
 
-		//- loaded javascript libraries
-		script(
-			src=format!"https://cdn.jsdelivr.net/npm/bootstrap@%s/dist/js/bootstrap.bundle.min.js"(BOOTSTRAP_JS_VERSION.split(";").front),
-			integrity=BOOTSTRAP_JS_VERSION.split(";").back,
-			crossorigin="anonymous"
-		)
-		script(
-			src=format!"https://cdn.jsdelivr.net/npm/chart.js@%s/dist/chart.min.js"(CHART_JS_VERSION.split(";").front),
-			integrity=CHART_JS_VERSION.split(";").back,
-			crossorigin="anonymous"
-		)
+		include parts/jslibs
 
 		- import asdf.serialization;
 		script= format!"var data = %s;"(data.serializeToJson!())
+
+		script.
+			// open element in new window by a given element id
+			function openElementInNewWindow(elemId){
+				win = window.open('', '_blank', 'width=800, height=600, top=100, left=100, resizeable, scrollbars');
+				win.document.head.innerHTML = document.head.innerHTML;
+				win.document.body.innerHTML = document.getElementById(elemId).innerHTML;
+				win.document.close();
+			};
+
+			// private definitions
+			(() => {
+				// activate tooltips on every data-bs-toggle attribute
+				var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+				var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+					return new bootstrap.Tooltip(tooltipTriggerEl)
+				})
+
+				const tcTimeline = data.trainingcache
+					.flatMap(t => t.processedHistory)
+					.map(t => {
+					return {
+						x: 'Training Cache',
+						y: [
+							t.timestamp,
+							t.timestamp + 5 * 60 * 1000
+						],
+						fillColor: '#008FFB'
+					}
+				});
+
+				const expressionTimeline = data.expressionHistory
+					.flatMap(e => [e.emojis,e.emoticons].flatMap(_ => _))
+					.map(e => {
+					return {
+						x: 'Expression History',
+						y: [
+							e.lastTimestamp,
+							e.lastTimestamp + 5 * 60 * 1000
+						],
+						fillColor: '#00E396'
+					}
+				});
+
+				const translationTimeline = data.translateCache
+					.flatMap(t => t.data)
+					.map(t => {
+					return {
+						x: 'Translation Cache',
+						y: [
+							t.timestamp * 1000,
+							t.timestamp * 1000 + 10 * 1000
+						],
+						fillColor: '#775DD0'
+					}
+				});
+
+				const clipboardTimeline = data.clipboard
+					.flatMap(t => t.entries)
+					.map(t => {
+					return {
+						x: 'Clipboard',
+						y: [
+							t.timestamp,
+							t.timestamp + 10 * 1000
+						],
+						fillColor: '#FEB019'
+					}
+				});
+
+				console.log(clipboardTimeline);
+
+				// Timeline chart
+				var options = {
+					series: [{
+							data: [].concat(
+								tcTimeline,
+								expressionTimeline,
+								translationTimeline,
+								clipboardTimeline
+							)
+					}],
+					chart: {
+						height: 350,
+						type: 'rangeBar'
+					},
+					plotOptions: {
+						bar: {
+							horizontal: true,
+							distributed: true,
+							dataLabels: {
+							hideOverflowingLabels: false
+							}
+						}
+					},
+					dataLabels: {
+						enabled: false,
+						style: {
+							colors: ['#f3f4f5', '#fff']
+						}
+					},
+					xaxis: {
+						type: 'datetime'
+					},
+					grid: {
+						row: {
+							colors: ['#f3f4f5', '#fff'],
+							opacity: 1
+						}
+					}
+				};
+
+				var chart = new ApexCharts(document.querySelector("#timeline-chart"), options);
+				chart.render();
+
+				if(data.expressionHistory)
+				{
+					const emojisMap = data.expressionHistory.flatMap(e => e.emojis);
+
+					var chart = new ApexCharts(document.querySelector("#expressionhistory-chart"), {
+						series: [{
+						name: 'Shares',
+						data: emojisMap.map(e => e.shares)
+						}],
+						chart: {
+							height: 350,
+							type: 'bar',
+						},
+						plotOptions: {
+							bar: {
+								borderRadius: 10,
+								dataLabels: {
+								position: 'top', // top, center, bottom
+								},
+							}
+						},
+						dataLabels: {
+							enabled: true,
+							offsetY: -20,
+							style: {
+								fontSize: '12px',
+								colors: ["#304758"]
+							}
+						},
+						xaxis: {
+							categories: emojisMap.map(e => e.emoji),
+							position: 'top',
+							axisBorder: {
+								show: false
+							},
+							axisTicks: {
+								show: false
+							},
+							crosshairs: {
+								fill: {
+									type: 'gradient',
+									gradient: {
+										colorFrom: '#D8E3F0',
+										colorTo: '#BED1E6',
+										stops: [0, 100],
+										opacityFrom: 0.4,
+										opacityTo: 0.5,
+									}
+								}
+							},
+							tooltip: {
+								enabled: true,
+							}
+						},
+						yaxis: {
+							axisBorder: {
+								show: false
+							},
+							axisTicks: {
+								show: false,
+							},
+						},
+						title: {
+							text: 'Number of shared emojis',
+							floating: true,
+							offsetY: 330,
+							align: 'center',
+							style: {
+								color: '#444'
+							}
+						}
+					});
+					chart.render();
+				}
+			})();

@@ -1,0 +1,4 @@
+- void statusIcon(T)(T value)
+	i.fas(
+		class= value ? "fa-check-circle text-success" : "fa-times-circle text-danger"
+	)
