@@ -6,6 +6,11 @@ import gboardforensics.models.clipboard;
 import std.algorithm;
 import std.file;
 import std.array;
+import std.path;
+import std.file;
+import std.base64;
+import std.string : stripLeft;
+import std.range : back;
 
 import d2sqlite3;
 
@@ -33,16 +38,35 @@ class ClipboardGatherer : IGatherer
 		auto db = Database(_clipboard.path);
 		scope(exit) db.close();
 
-		_clipboard.entries = db.execute(`SELECT
+		Appender!(Clipboard.Entry[]) entries;
+
+		db.execute(`SELECT
 				text,
 				html_text AS html,
 				uri IS NULL OR uri = "" AS type,
 				datetime(timestamp/1000, 'unixepoch') AS time,
 				timestamp,
-				uri
+				uri,
+				""
 			FROM clips`)
 			.map!(r => r.as!(Clipboard.Entry))
-			.array;
+			.each!((Clipboard.Entry e) {
+				if(e.type == Clipboard.Entry.Type.DOCUMENT)
+				{
+					auto documentPath = buildPath(
+						dirName(_clipboard.path),
+						"../files/" ~ e.uri
+							.findSplitAfter("content://")[1]
+							.findSplitAfter("/")[1]
+					);
+
+					if(documentPath.exists && documentPath.isFile)
+						e.document = Base64.encode(cast(ubyte[])documentPath.read);
+				}
+				entries ~= e;
+			});
+
+		_clipboard.entries = entries[];
 	}
 
 	/**

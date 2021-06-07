@@ -28,12 +28,14 @@ struct Clipboard
 		@serdeIgnoreDefault string html;
 		/// type
 		Type type;
-		/// UNIX epoch formatted timestamp
-		size_t timestamp;
 		/// string representation of the timestamp
 		string time;
+		/// UNIX epoch formatted timestamp
+		size_t timestamp;
 		/// URI
 		@serdeIgnoreDefault string uri;
+		/// Document formatted in base64
+		@serdeIgnoreDefault string document;
 	}
 
 	/**
