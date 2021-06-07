@@ -14,9 +14,24 @@ from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest.IngestModule import IngestModuleException
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.datamodel import BlackboardArtifact
+from org.sleuthkit.autopsy.report import GeneralReportModuleAdapter
+from org.sleuthkit.autopsy.report.ReportProgressPanel import ReportStatus
 
 from java.util.logging import Level
 from java.lang import System
+
+GBOARD_PACKAGE_NAME = 'com.google.android.inputmethod.latin'
+
+def find_first_folder(path, folder):
+    normalized_path = os.path.normpath(path)
+    splitted_path = normalized_path.split(os.path.sep)
+
+    for idx, dir in enumerate(splitted_path):
+        if dir == folder:
+            return os.path.sep.join(splitted_path[:idx+1])
+
+    # Not found
+    return None
 
 class GboardDataSourceIngestModuleFactory(IngestModuleFactoryAdapter):
 
@@ -54,8 +69,6 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
     GBOARD_TC_DELETE_FLAG_ATTRIBUTE = 'GBOARD_TC_DELETE_FLAG_OBJECT'
 
-    GBOARD_PACKAGE_NAME = 'com.google.android.inputmethod.latin'
-
     def log(self, level, msg):
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
 
@@ -90,6 +103,15 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
             self.tc_history_timeline_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_HISTORY_TIMELINE_ARTIFACT, 'Gboard History Timeline')
             self.tc_raw_assembled_timeline_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_RAW_ASSEMBLED_TIMELINE_ARTIFACT, 'Gboard Assembled Timeline')
             self.tc_processed_history_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TC_PROCESSED_HISTORY_ARTIFACT, 'Gboard Processed History')
+            self.emojis_art_type = self.createCustomArtifactType(current_case, self.GBOARD_EMOJIS_ARTIFACT, 'Gboard Expression History: Emojis')
+            self.emoticons_art_type = self.createCustomArtifactType(current_case, self.GBOARD_EMOTICONS_ARTIFACT, 'Gboard Expression History: Emoticons')
+            self.translate_art_type = self.createCustomArtifactType(current_case, self.GBOARD_TRANSLATE_ARTIFACT, 'Gboard Translate Cache')
+
+            # emojis and emoticons attributes
+            self.expression_shares_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_EXPRESSION_SHARES_ATTRIBUTE, 'Shares')
+            self.expression_emoji_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_EXPRESSION_EMOJI_ATTRIBUTE, 'Emoji')
+            self.expression_base_emoji_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_EXPRESSION_BASE_EMOJI_ATTRIBUTE, 'Base Emoji')
+            self.expression_emoticon_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_EXPRESSION_EMOTICON_ATTRIBUTE, 'Emoticon')
 
             # training cache attributes
             self.tc_delete_flag_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TC_DELETE_FLAG_ATTRIBUTE, 'Deleted?')
@@ -189,7 +211,7 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
             file_manager (FileManager): file manager service
         """
 
-        files = file_manager.findFiles(data_source, '%', self.GBOARD_PACKAGE_NAME + '/files/clipboard_image/')
+        files = file_manager.findFiles(data_source, '%', GBOARD_PACKAGE_NAME + '/files/clipboard_image/')
         for file in files:
             self.publish_analysis_artifact(blackboard, file, BlackboardArtifact.ARTIFACT_TYPE.TSK_CLIPBOARD_CONTENT, [
                     (self.clipboard_attr_type, str(True))
@@ -224,7 +246,7 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
         ]
 
     def get_input_dir(self, data_source, file_manager):
-        files = file_manager.findFiles(data_source, "%" + self.GBOARD_PACKAGE_NAME + "%")
+        files = file_manager.findFiles(data_source, "%" + GBOARD_PACKAGE_NAME + "%")
 
         for file in files:
             if file.isFile():
@@ -232,20 +254,9 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
                 if not path:
                     continue
 
-                return self.find_first_folder(path, self.GBOARD_PACKAGE_NAME)
+                return find_first_folder(path, GBOARD_PACKAGE_NAME)
 
-        raise IngestModuleException('Folder ' + self.GBOARD_PACKAGE_NAME + ' not found in ' + data_source.getName() + ' data source!')
-
-    def find_first_folder(self, path, folder):
-        normalized_path = os.path.normpath(path)
-        splitted_path = normalized_path.split(os.path.sep)
-
-        for idx, dir in enumerate(splitted_path):
-            if dir == folder:
-                return os.path.sep.join(splitted_path[:idx+1])
-
-        # Not found
-        return None
+        raise IngestModuleException('Folder ' + GBOARD_PACKAGE_NAME + ' not found in ' + data_source.getName() + ' data source!')
 
     def report_analysis(self, input_dir, data_source, blackboard, file_manager, analysis_output):
         for dictionary in analysis_output['dictionaries']:
@@ -286,7 +297,7 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
         rel_path = full_path.split(sanitized_path)
         if len(rel_path) > 1:
-            full_gboard_path = os.path.join(self.GBOARD_PACKAGE_NAME, os.path.dirname(rel_path[1])).replace("\\", "/")
+            full_gboard_path = os.path.join(GBOARD_PACKAGE_NAME, os.path.dirname(rel_path[1])).replace("\\", "/")
             files = file_manager.findFiles(data_source, os.path.basename(rel_path[1]).replace("\\", "/"), full_gboard_path)
             return files[0] if files else None
         else:
@@ -308,3 +319,99 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
             blackboard.indexArtifact(artifact)
         except Blackboard.BlackboardException:
             self.log(Level.SEVERE, "Error indexing artifact " + artifact.getDisplayName())
+
+class GBoardGeneralReportModule(GeneralReportModuleAdapter):
+    moduleName = "GBoard General Report Module"
+
+    _logger = Logger.getLogger(moduleName)
+
+    def log(self, level, msg):
+        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+
+    def getName(self):
+        return self.moduleName
+
+    def getDescription(self):
+        return "Extracts Android GBoard app data to an HTML report"
+
+    def getRelativeFilePath(self):
+        return "report.html"
+
+    def generate_reporter_args(self, input_dir):
+        return [
+            self.path_to_exe,
+            '-t', 'html',
+            '-r', input_dir
+        ]
+
+    def run_reporter(self, input_dir):
+        """Run reporter tool with a given input directory
+
+        Args:
+            input_dir (str): Input directory
+            output_file (str): Output file
+        """
+
+        self.log(Level.INFO, "Running reporter on " + input_dir + " folder")
+
+        cmd_args = self.generate_reporter_args(input_dir)
+        self.log(Level.INFO, "Command Args:" + str(cmd_args))
+
+        process = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        cmd_out, cmd_err = process.communicate()
+        if process.returncode != 0:
+            raise IngestModuleException('Executable failed to execute! \nstdout:' + cmd_out + '\nstderr:' + cmd_err)
+
+        return cmd_out
+
+    def get_input_dir(self, file_manager):
+        files = file_manager.findFiles("%" + GBOARD_PACKAGE_NAME + "%")
+
+        for file in files:
+            if file.isFile():
+                path = file.getLocalAbsPath()
+                if not path:
+                    continue
+
+                return find_first_folder(path, GBOARD_PACKAGE_NAME)
+
+        raise IngestModuleException('Folder ' + GBOARD_PACKAGE_NAME + ' not found in current case!')
+
+    # The 'baseReportDir' object being passed in is a string with the directory that reports are being stored in.   Report should go into baseReportDir + getRelativeFilePath().
+    # The 'progressBar' object is of type ReportProgressPanel.
+    #   See: http://sleuthkit.org/autopsy/docs/api-docs/latest/classorg_1_1sleuthkit_1_1autopsy_1_1report_1_1_report_progress_panel.html
+    def generateReport(self, baseReportDir, progressBar):
+
+        module_path = os.path.dirname(os.path.abspath(__file__))
+        exe_ext = '.exe' if os.name == 'nt' else ''
+        self.path_to_exe = os.path.join(module_path, 'gboard-forensics' + exe_ext)
+
+        self.log(Level.INFO, "Running reporter for " + baseReportDir.getReportDirectoryPath() + " folder")
+        self.log(Level.INFO, "Relative file path: " + self.getRelativeFilePath())
+
+        # Issue: https://sleuthkit.discourse.group/t/error-generting-reports-in-python/2297
+        output_file = os.path.join(baseReportDir.getReportDirectoryPath(), self.getRelativeFilePath())
+        progressBar.setIndeterminate(True)
+        progressBar.start()
+
+        try:
+            current_case = Case.getCurrentCaseThrows()
+            services = current_case.getServices()
+
+            file_manager = services.getFileManager()
+
+            input_dir = self.get_input_dir(file_manager)
+            # Run GBoard analysis tool
+            report_output = self.run_reporter(input_dir)
+
+            report = open(output_file, 'w')
+            report.write(report_output)
+            report.close()
+
+            current_case.addReport(output_file, self.moduleName, "HTML Report")
+            progressBar.complete(ReportStatus.COMPLETE)
+
+        except NoCurrentCaseException as ex:
+            self.log(Level.WARNING, "No case currently open. " + ex.toString())
+            progressBar.complete(ReportStatus.ERROR)
