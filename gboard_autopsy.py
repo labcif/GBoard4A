@@ -57,11 +57,27 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
     _logger = Logger.getLogger(GboardDataSourceIngestModuleFactory.moduleName)
 
     GBOARD_CLIPBOARD_ATTRIBUTE = 'GBOARD_CLIPBOARD_OBJECT'
+    GBOARD_CLIPBOARD_HTML_TEXT_ATTRIBUTE = 'GBOARD_CLIPBOARD_HTML_TEXT_OBJECT'
+
+    GBOARD_EMOJIS_ARTIFACT = 'GBOARD_EMOJIS_OBJECT'
+    GBOARD_EMOTICONS_ARTIFACT = 'GBOARD_EMOTICONS_OBJECT'
+
+    GBOARD_EXPRESSION_SHARES_ATTRIBUTE = 'GBOARD_EXPRESSION_SHARES_OBJECT'
+    GBOARD_EXPRESSION_EMOJI_ATTRIBUTE = 'GBOARD_EXPRESSION_EMOJI_OBJECT'
+    GBOARD_EXPRESSION_BASE_EMOJI_ATTRIBUTE = 'GBOARD_EXPRESSION_BASE_EMOJI_OBJECT'
+    GBOARD_EXPRESSION_EMOTICON_ATTRIBUTE = 'GBOARD_EXPRESSION_EMOTICON_OBJECT'
 
     GBOARD_DICTIONARY_ARTIFACT = 'GBOARD_DICTIONARY_OBJECT'
     GBOARD_DICTIONARY_WORD_ATTRIBUTE = 'GBOARD_DICTIONARY_WORD_OBJECT'
     GBOARD_DICTIONARY_SHORTCUT_ATTRIBUTE = 'GBOARD_DICTIONARY_SHORTCUT_OBJECT'
     GBOARD_DICTIONARY_LOCALE_ATTRIBUTE = 'GBOARD_DICTIONARY_LOCALE_OBJECT'
+
+    GBOARD_TRANSLATE_ARTIFACT = 'GBOARD_TRANSLATE_OBJECT'
+    GBOARD_TRANSLATE_ORIGINAL_ATTRIBUTE = 'GBOARD_TRANSLATE_ORIGINAL_OBJECT'
+    GBOARD_TRANSLATE_TRANSLATED_ATTRIBUTE = 'GBOARD_TRANSLATE_TRANSLATED_OBJECT'
+    GBOARD_TRANSLATE_FROM_ATTRIBUTE = 'GBOARD_TRANSLATE_FROM_OBJECT'
+    GBOARD_TRANSLATE_TO_ATTRIBUTE = 'GBOARD_TRANSLATE_TO_OBJECT'
+    GBOARD_TRANSLATE_URL_ATTRIBUTE = 'GBOARD_TRANSLATE_URL_OBJECT'
 
     GBOARD_TC_HISTORY_TIMELINE_ARTIFACT = 'GBOARD_TC_HISTORY_TIMELINE_OBJECT'
     GBOARD_TC_RAW_ASSEMBLED_TIMELINE_ARTIFACT = 'GBOARD_TC_RAW_ASSEMBLED_TIMELINE_OBJECT'
@@ -118,11 +134,19 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
             # clipboard attributes
             self.clipboard_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_CLIPBOARD_ATTRIBUTE, 'Gboard Clipboard')
+            self.clipboard_html_text_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_CLIPBOARD_HTML_TEXT_ATTRIBUTE, 'HTML Text')
 
             # dictionary attributes
             self.dictionary_word_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_DICTIONARY_WORD_ATTRIBUTE, 'Word')
             self.dictionary_shortcut_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_DICTIONARY_SHORTCUT_ATTRIBUTE, 'Shortcut')
             self.dictionary_locale_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_DICTIONARY_LOCALE_ATTRIBUTE, 'Locale')
+
+            # translation cache attributes
+            self.translate_original_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TRANSLATE_ORIGINAL_ATTRIBUTE, 'Original Text')
+            self.translate_translated_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TRANSLATE_TRANSLATED_ATTRIBUTE, 'Translated Text')
+            self.translate_from_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TRANSLATE_FROM_ATTRIBUTE, 'From Language')
+            self.translate_to_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TRANSLATE_TO_ATTRIBUTE, 'To Language')
+            self.translate_url_attr_type = self.createCustomAttributeType(current_case, self.GBOARD_TRANSLATE_URL_ATTRIBUTE, 'Request URL')
 
         except NoCurrentCaseException as ex:
             self.log(Level.WARNING, "No case currently open. " + ex)
@@ -213,8 +237,10 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
         files = file_manager.findFiles(data_source, '%', GBOARD_PACKAGE_NAME + '/files/clipboard_image/')
         for file in files:
+            timestamp = os.path.basename(os.path.splitext(file.getLocalAbsPath())[0])
             self.publish_analysis_artifact(blackboard, file, BlackboardArtifact.ARTIFACT_TYPE.TSK_CLIPBOARD_CONTENT, [
-                    (self.clipboard_attr_type, str(True))
+                    (self.clipboard_attr_type, str(True)),
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, long(timestamp) / 1000)
                 ])
 
     def run_analyzer(self, input_dir):
@@ -268,6 +294,55 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
                     (self.dictionary_locale_attr_type, entry['locale'])
                 ])
 
+        for clipboard in analysis_output['clipboard']:
+            file = self.get_common_sufix_file(data_source, file_manager, input_dir, clipboard['path'])
+            for entry in clipboard['entries']:
+                if entry['type'] != "DOCUMENT":
+                    attr_lst = [
+                        (self.clipboard_attr_type, str(True)),
+                        (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp'] / 1000),
+                        (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, entry['text']),
+                    ]
+
+                    if 'html' in entry:
+                        attr_lst.append((self.clipboard_html_text_attr_type, entry['html'])),
+
+                    self.publish_analysis_artifact(blackboard, file, BlackboardArtifact.ARTIFACT_TYPE.TSK_CLIPBOARD_CONTENT, attr_lst)
+
+        for expressionhistory in analysis_output['expressionHistory']:
+            file = self.get_common_sufix_file(data_source, file_manager, input_dir, expressionhistory['path'])
+            for emoji in expressionhistory['emojis']:
+                self.publish_analysis_artifact(blackboard, file, self.emojis_art_type, [
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, emoji['lastTimestamp'] / 1000),
+                    (self.expression_emoji_attr_type, emoji['emoji']),
+                    (self.expression_base_emoji_attr_type, emoji['baseEmoji']),
+                    (self.expression_shares_attr_type, str(emoji['shares'])),
+                ])
+
+            for emoticon in expressionhistory['emoticons']:
+                self.publish_analysis_artifact(blackboard, file, self.emoticons_art_type, [
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, emoticon['lastTimestamp'] / 1000),
+                    (self.expression_emoticon_attr_type, emoticon['emoticon']),
+                    (self.expression_shares_attr_type, str(emoticon['shares'])),
+                ])
+
+        for translationcache in analysis_output['translateCache']:
+            for entry in translationcache['data']:
+                req_file = self.get_common_sufix_file(data_source, file_manager, input_dir, entry['requestPath'])
+                res_file = self.get_common_sufix_file(data_source, file_manager, input_dir, entry['responsePath'])
+
+                attr_lst = [
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp']),
+                    (self.translate_original_attr_type, entry['orig']),
+                    (self.translate_translated_attr_type, entry['trans']),
+                    (self.translate_from_attr_type, entry['from']),
+                    (self.translate_to_attr_type, entry['to']),
+                    (self.translate_url_attr_type, entry['requestURL'])
+                ]
+
+                self.publish_analysis_artifact(blackboard, req_file, self.translate_art_type, attr_lst)
+                self.publish_analysis_artifact(blackboard, res_file, self.translate_art_type, attr_lst)
+
         for trainingcache in analysis_output['trainingcache']:
             file = self.get_common_sufix_file(data_source, file_manager, input_dir, trainingcache['path'])
             # process raw histories
@@ -278,13 +353,13 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
             # process relevant histories
             for entry in trainingcache['processedHistory']:
                 self.publish_analysis_artifact(blackboard, file, self.tc_processed_history_art_type, [
-                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp']),
+                    (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp'] / 1000),
                     (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, entry['sequence']),
                 ])
 
     def publish_raw_history_artifact(self, blackboard, file, entry, art_type):
         self.publish_analysis_artifact(blackboard, file, art_type, [
-            (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp']),
+            (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, entry['timestamp'] / 1000),
             (BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, entry['sequence']),
             (self.tc_delete_flag_attr_type, str(entry['deleted']))
         ])
