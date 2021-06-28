@@ -16,6 +16,7 @@ from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.datamodel import BlackboardArtifact
 
 from java.util.logging import Level
+from java.lang import System
 
 class GboardDataSourceIngestModuleFactory(IngestModuleFactoryAdapter):
 
@@ -75,7 +76,7 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
         # check if executable exists
         module_path = os.path.dirname(os.path.abspath(__file__))
-        exe_ext = '.exe' if os.name == 'nt' else ''
+        exe_ext = '.exe' if 'win' in System.getProperty("os.name").encode('ascii','ignore').lower() else ''
         self.path_to_exe = os.path.join(module_path, 'gboard-forensics' + exe_ext)
 
         if not os.path.exists(self.path_to_exe):
@@ -285,8 +286,8 @@ class GboardDataSourceIngestModule(DataSourceIngestModule):
 
         rel_path = full_path.split(sanitized_path)
         if len(rel_path) > 1:
-            full_gboard_path = os.path.join(self.GBOARD_PACKAGE_NAME, os.path.dirname(rel_path[1]))
-            files = file_manager.findFiles(data_source, os.path.basename(rel_path[1]), full_gboard_path)
+            full_gboard_path = os.path.join(self.GBOARD_PACKAGE_NAME, os.path.dirname(rel_path[1])).replace("\\", "/")
+            files = file_manager.findFiles(data_source, os.path.basename(rel_path[1]).replace("\\", "/"), full_gboard_path)
             return files[0] if files else None
         else:
             return None
