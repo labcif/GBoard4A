@@ -2,6 +2,7 @@ module gboardforensics.analysis;
 
 import gboardforensics.gatherers;
 import gboardforensics.models;
+import gboardforensics.utils.serialization;
 
 import std.json;
 import std.exception;
@@ -127,13 +128,13 @@ struct AnalysisData
 	@serdeIgnoreDefault string rootPath;
 
 	/// found dictionaries
-	@serdeIgnoreDefault const(Dictionary)[] dictionaries;
+	SerializableArray!(const(Dictionary)) dictionaries;
 	/// found training caches
-	@serdeIgnoreDefault const(TrainingCache)[] trainingcache;
+	SerializableArray!(const(TrainingCache)) trainingcache;
 	/// found clipboard
-	@serdeIgnoreDefault const(Clipboard)[] clipboard;
+	SerializableArray!(const(Clipboard)) clipboard;
 	/// found expression histories
-	@serdeIgnoreDefault const(ExpressionHistory)[] expressionHistory;
+	SerializableArray!(const(ExpressionHistory)) expressionHistory;
 	/// found translate caches
-	@serdeIgnoreDefault const(TranslateCache)[] translateCache;
+	SerializableArray!(const(TranslateCache)) translateCache;
 }
