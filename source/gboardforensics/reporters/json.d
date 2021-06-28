@@ -33,5 +33,22 @@ unittest
 	data.rootPath = "foobar";
 
 	auto reporter = new JsonReporter(data);
-	assert(reporter.toString() == "{\n\t\"rootPath\": \"foobar\"\n}");
+	assert(reporter.toString() == `{
+	"rootPath": "foobar",
+	"dictionaries": [
+
+	],
+	"trainingcache": [
+
+	],
+	"clipboard": [
+
+	],
+	"expressionHistory": [
+
+	],
+	"translateCache": [
+
+	]
+}`);
 }
