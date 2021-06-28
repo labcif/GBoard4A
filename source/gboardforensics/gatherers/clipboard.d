@@ -47,15 +47,16 @@ class ClipboardGatherer : IGatherer
 				datetime(timestamp/1000, 'unixepoch') AS time,
 				timestamp,
 				uri,
-				""
+				"" AS content
 			FROM clips`)
 			.map!(r => r.as!(Clipboard.Entry))
 			.each!((Clipboard.Entry e) {
 				if(e.type == Clipboard.Entry.Type.DOCUMENT)
 				{
-					auto documentPath = buildPath(
-						dirName(_clipboard.path),
-						"../files/" ~ e.uri
+					auto documentPath = _clipboard.path
+						.dirName
+						.buildPath("..",
+							"files", e.uri
 							.findSplitAfter("content://")[1]
 							.findSplitAfter("/")[1]
 					);
