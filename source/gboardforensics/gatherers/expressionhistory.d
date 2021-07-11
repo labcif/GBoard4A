@@ -36,19 +36,21 @@ class ExpressionHistoryGatherer : IGatherer
 		_expressionHistory.emojis = db.execute(`SELECT
 				emoji,
 				base_variant_emoji AS baseEmoji,
-				datetime(last_event_millis/1000, 'unixepoch') AS lastTime,
-				last_event_millis as lastTimestamp,
-				shares
-			FROM emoji_shares`)
+				datetime(MAX(last_event_millis)/1000, 'unixepoch') AS lastTime,
+				MAX(last_event_millis) as lastTimestamp,
+				SUM(shares)
+			FROM emoji_shares
+			GROUP BY 1`)
 			.map!(r => r.as!(ExpressionHistory.Emoji))
 			.array;
 
 		_expressionHistory.emoticons = db.execute(`SELECT
 				emoticon,
-				datetime(last_event_millis/1000, 'unixepoch') AS lastTime,
-				last_event_millis as lastTimestamp,
-				shares
-			FROM emoticon_shares`)
+				datetime(MAX(last_event_millis)/1000, 'unixepoch') AS lastTime,
+				MAX(last_event_millis) as lastTimestamp,
+				SUM(shares)
+			FROM emoticon_shares
+			GROUP BY 1`)
 			.map!(r => r.as!(ExpressionHistory.Emoticon))
 			.array;
 	}
