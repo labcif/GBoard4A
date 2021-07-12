@@ -18,3 +18,10 @@ coverage:
 	dub test --build=cov
 	dub test --build=unittest-cov
 	./tests/run.sh --build=cov
+
+clean:
+	rm -rf .dub/
+	rm -rf bin/
+
+clean-coverage:
+	find . -type f -name '*.lst' -delete
