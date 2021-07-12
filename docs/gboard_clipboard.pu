@@ -1,0 +1,20 @@
+@startuml
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "clips" {
+  *_id integer <<generated>>
+  --
+  text : text <<unique>>
+  html_text : text <<unique>>
+  *item_type : integer
+  *entity_type : integer
+  timestamp : integer
+  uri : text <<unique>>
+  group_id : integer
+}
+
+@enduml

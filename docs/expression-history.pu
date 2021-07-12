@@ -1,0 +1,23 @@
+@startuml
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "emoji_shares" {
+  *emoji : text
+  *base_variant_emoji : text
+  *truncated_timestamp_millis : integer
+  *last_event_millis : integer
+	*shares : integer
+}
+
+entity "emoticon_shares" {
+  *emoticon : text
+  *truncated_timestamp_millis : integer
+  *last_event_millis : integer
+	*shares : integer
+}
+
+@enduml
