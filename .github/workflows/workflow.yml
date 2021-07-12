@@ -33,7 +33,14 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/dlang-community/d2sqlite3/master/lib/win64/sqlite3.lib -OutFile ${{ github.workspace }}\sqlite3.lib
 
-      - name: Run tests
+      - name: 'linux: Run full test suite'
+        if: runner.os == 'linux'
+        run: |
+          make test
+          make coverage
+
+      - name: Run unittests
+        if: runner.os != 'linux'
         run: |
           # Test in release mode
           dub test --build=release
