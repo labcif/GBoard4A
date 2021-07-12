@@ -7,3 +7,14 @@ adb-pull:
 	adb shell su root -c 'chown $(shell adb shell stat -L -c "%U:%G" /sdcard) -R /sdcard/gboard-temp'
 	adb pull /sdcard/gboard-temp gboard-data-$(shell make adb-getversion)
 	adb shell su root -c 'rm -rf /sdcard/gboard-temp'
+
+test:
+	dub build --build=unittest
+	dub test --build=release
+	./tests/run.sh
+	./tests/run.sh --build=release
+
+coverage:
+	dub test --build=cov
+	dub test --build=unittest-cov
+	./tests/run.sh --build=cov
