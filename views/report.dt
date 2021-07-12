@@ -468,7 +468,9 @@ html(lang="en")
 
 				if(data.expressionHistory)
 				{
-					const emojisMap = data.expressionHistory.flatMap(e => e.emojis);
+					const emojisMap = data.expressionHistory
+						.flatMap(e => e.emojis)
+						.sort((a,b) => b.shares - a.shares);
 
 					var chart = new ApexCharts(document.querySelector("#expressionhistory-chart"), {
 						series: [{
