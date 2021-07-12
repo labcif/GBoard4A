@@ -14,3 +14,7 @@ gboard-forensics
 
 # D .lst unittest artifacts
 *.lst
+
+# Documentation output
+docs/*.pdf
+docs/*.svg
