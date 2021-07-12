@@ -79,19 +79,19 @@ int main(string[] args)
 	// check if output folder exists
 	if(opt.output && !opt.output.dirName().exists())
 	{
-		stderr.writefln!"The ouput folder specified '%s' does not exist!"(opt.output);
+		stderr.writefln!`The ouput folder specified "%s" does not exist!`(opt.output);
 		return ENOENT;
 	}
 
 	if (opt.files.length && opt.files.any!(f => !f.exists()))
 	{
-		stderr.writefln!"One or more files specified [%-('%s', %)] do not exist!"(opt.files.filter!(f => !f.exists()));
+		stderr.writefln!"One or more files specified [%(%s, %)] do not exist!"(opt.files.filter!(f => !f.exists()));
 		return ENOENT;
 	}
 
 	if (opt.dirs.length && opt.dirs.any!(d => !d.exists()))
 	{
-		stderr.writefln!"One or more directories specified [%-('%s', %)] do not exist!"(opt.dirs.filter!(d => !d.exists()));
+		stderr.writefln!"One or more directories specified [%(%s, %)] do not exist!"(opt.dirs.filter!(d => !d.exists()));
 		return ENOENT;
 	}
 
