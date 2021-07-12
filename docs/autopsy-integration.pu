@@ -1,0 +1,28 @@
+
+@startuml
+
+actor "Forensic Analyst" as fanalyst
+participant "Autopsy" as autopsy
+participant "Standalone App" as sapp
+database "Gboard Databases" as gboard
+
+autonumber
+
+fanalyst -> autopsy: Run the module
+activate sapp
+autopsy -> sapp: Analysis request
+sapp -> sapp: Run root analysis
+loop until all databases analyzed
+	activate sapp
+		sapp -> gboard: Request data
+		activate gboard
+		gboard --> sapp: Fetched entries
+		deactivate gboard
+end
+deactivate sapp
+sapp --> autopsy: Processed analysis results
+destroy sapp
+autopsy -> autopsy: Generate blackboard artifacts
+autopsy --> fanalyst: Finished analysis
+
+@enduml
