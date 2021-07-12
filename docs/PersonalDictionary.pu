@@ -1,0 +1,16 @@
+@startuml
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "entry" {
+  *_id integer <<generated>>
+  --
+  word : text
+  shortcut : text
+  locale : text
+}
+
+@enduml

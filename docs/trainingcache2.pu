@@ -1,0 +1,42 @@
+@startuml
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "tf_table" {
+  *_id integer <<generated>>
+  --
+  *_timestamp : long
+  *_payload : blob
+  f1 : integer
+  f2 : integer
+  f3 : text
+  f4 : integer
+}
+
+entity "d_table" {
+  *_id : integer <<generated>>
+  --
+  *_timestamp : long
+  *_payload : blob
+  f1 : integer
+  f2 : integer
+  f3 : integer
+  f4 : integer
+  f5 : text
+  f6 : integer
+}
+
+entity "tm_table" {
+  *_id : integer <<generated>>
+  --
+  *_timestamp : long
+  *_payload : blob
+  f1 : integer
+  f2 : integer
+  f3 : integer
+}
+
+@enduml
