@@ -1,3 +1,11 @@
+/**
+ * Module representing the serializable model of training cache data source
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.models.trainingcache;
 
 import gboardforensics.utils.serialization;
@@ -6,16 +14,27 @@ import std.typecons : Nullable;
 
 import asdf.serialization : serdeIgnore, serdeIgnoreDefault;
 
+/**
+ * Serializable model of the training cache data source
+ */
 struct TrainingCache
 {
+	/**
+	 * Serializable representation of a training cache entry
+	 */
 	struct Info
 	{
-		string time;
-		string sequence;
-		@serdeIgnoreDefault Nullable!bool deleted;
-		size_t timestamp;
+		string time; /// text representation of the timestamp field
+		string sequence; /// character sequence of the entry
+		@serdeIgnoreDefault Nullable!bool deleted; /// wether the field is deleted or inserted, if applicable
+		size_t timestamp; /// timestamp in UNIX epoch (milliseconds)
 	}
 
+	/**
+	 * Count number of entries fetched
+	 *
+	 * Returns: number of entries
+	 */
 	@safe pure nothrow
 	size_t countItems() const
 	{

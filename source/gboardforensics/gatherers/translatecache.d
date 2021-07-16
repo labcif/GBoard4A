@@ -1,3 +1,11 @@
+/**
+ * This module represents the gatherer logic for the translate cache
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.gatherers.translatecache;
 
 import gboardforensics.gatherers : IGatherer;
@@ -10,14 +18,24 @@ import std.range : assocArray, back, front, split, tail;
 import std.regex : matchFirst, regex;
 import std.typecons : No, tuple;
 
+/**
+ * This represents a gatherer for GBoard Translate cache
+ */
 class TranslateCacheGatherer : IGatherer
 {
+	/**
+	 * Constructs a gatherer with a given folder path
+	 *
+	 * Params:
+	 *   _dir = path to the translate cache folder
+	 */
 	this(DirEntry _dir)
 		in (_dir.isDir())
 	{
 		this._dir = _dir;
 	}
 
+	///
 	void gather()
 	{
 		import std.array : array;
@@ -41,7 +59,11 @@ class TranslateCacheGatherer : IGatherer
 			.array;
 	}
 
-
+	/**
+	 * Gets the collected translate cache
+	 *
+	 * Returns: translate cache serializable structure
+	 */
 	@property const(TranslateCache) translateCache() const
 	{
 		return _cache;

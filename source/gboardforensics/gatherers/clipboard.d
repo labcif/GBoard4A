@@ -1,3 +1,11 @@
+/**
+ * This module represents the gatherer logic for the clipboard manager
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.gatherers.clipboard;
 
 import gboardforensics.gatherers;
@@ -73,7 +81,7 @@ class ClipboardGatherer : IGatherer
 	/**
 	 * Gets the collected clipboard
 	 *
-	 * Returns: clipboard data structure
+	 * Returns: clipboard data serializable structure
 	 */
 	@property const(Clipboard) clipboard() const
 	{

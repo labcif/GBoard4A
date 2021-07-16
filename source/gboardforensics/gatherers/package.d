@@ -1,3 +1,11 @@
+/**
+ * Package representing all the gatherers of GBoard sources
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.gatherers;
 
 public {

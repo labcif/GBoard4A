@@ -1,3 +1,11 @@
+/**
+ * Module representing the serializable model of dictionary data source
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.models.dictionary;
 
 import gboardforensics.utils.serialization;
@@ -32,6 +40,13 @@ struct Dictionary
 		return entries.length;
 	}
 
+	/**
+	 * Construct a dictionary
+	 *
+	 * Params:
+	 *   path = path of the dictionary
+	 *   entries = list of dictionary entries
+	 */
 	@safe pure nothrow @nogc
 	this(string path, const(Entry)[] entries)
 	{

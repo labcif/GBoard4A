@@ -1,3 +1,11 @@
+/**
+ * This module represents the JSON output reporter
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.reporters.json;
 
 import asdf.serialization;
