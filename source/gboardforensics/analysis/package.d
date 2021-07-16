@@ -1,3 +1,11 @@
+/**
+ * Package representing the analysis logic
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.analysis;
 
 import gboardforensics.gatherers;
@@ -90,16 +98,19 @@ struct AnalysisData
 		this.clipboard ~= gatherer.clipboard;
 	}
 
+	/// ditto
 	void add(ExpressionHistoryGatherer gather)
 	{
 		this.expressionHistory ~= gather.expressionHistory;
 	}
 
+	/// ditto
 	void add(TranslateCacheGatherer gatherer)
 	{
 		this.translateCache ~= gatherer.translateCache;
 	}
 
+	/// ditto
 	auto opOpAssign(string op, T : AnalysisData)(T value)
 		if (op == "~")
 	{

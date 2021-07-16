@@ -43,7 +43,7 @@ struct SerializableArray(T)
 pure
 unittest
 {
-	SerializableArray!int b;
+	immutable SerializableArray!int b;
 
 	assert(b == []);
 	assert("[]" == b.serializeToJson!());

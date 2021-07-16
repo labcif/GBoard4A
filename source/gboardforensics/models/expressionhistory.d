@@ -1,3 +1,12 @@
+/**
+ * Module representing a serializable model of an Expression History data
+ * source.
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.models.expressionhistory;
 
 import asdf.serialization;
@@ -30,6 +39,9 @@ struct ExpressionHistory
 		@serdeIgnoreDefault int shares;
 	}
 
+	/**
+	 * This represents a single entry in the emoticons table
+	 */
 	struct Emoticon
 	{
 		/// Emoticon text representation

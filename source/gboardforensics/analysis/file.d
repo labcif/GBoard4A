@@ -1,3 +1,11 @@
+/**
+ * Module representing the file detector and analysis logic for files
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.analysis.file;
 
 import gboardforensics.gatherers;
@@ -56,7 +64,7 @@ struct FileDetector
 	 */
 	public IGatherer detect()
 	{
-		byte[] buf = file.rawRead(new byte[SQLITE3_SIGNATURE.length]);
+		const byte[] buf = file.rawRead(new byte[SQLITE3_SIGNATURE.length]);
 
 		// detect SQLite3 file
 		if(buf.length == SQLITE3_SIGNATURE.length && buf == SQLITE3_SIGNATURE)

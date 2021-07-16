@@ -1,3 +1,11 @@
+/**
+ * Module representing the serializable model of a Clipboard data source
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.models.clipboard;
 
 import gboardforensics.utils.serialization;

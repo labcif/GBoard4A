@@ -1,3 +1,11 @@
+/**
+ * This module represents the HTML output reporter
+ *
+ * Authors: João Lourenço, Luís Ferreira
+ * Copyright: João Lourenço (c) 2021
+ *            Luís Ferreira (c) 2021
+ * License: GPL-3.0
+ */
 module gboardforensics.reporters.html;
 
 import std.datetime;
@@ -25,8 +33,7 @@ class HTMLReporter : Reporter
 		import std.array : appender;
 		import diet.html : compileHTMLDietFile;
 
-		// explicit mutable copy of data
-		AnalysisData data = this.data;
+		const AnalysisData data = this.data;
 
 		auto dst = appender!string();
 		dst.compileHTMLDietFile!("report.dt",
