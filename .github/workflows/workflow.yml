@@ -1,5 +1,5 @@
 name: Build and Test
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   test:
@@ -26,7 +26,6 @@ jobs:
           brew install coreutils pkg-config sqlite
           echo "LIBRARY_PATH=${LD_LIBRARY_PATH-}:/usr/local/lib/" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/usr/local/opt/sqlite/lib/pkgconfig" >> $GITHUB_ENV
-
       - name: 'Windows: Get and setup dependencies'
         if: runner.os == 'Windows'
         shell: powershell
@@ -54,3 +53,29 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           fail_ci_if_error: true
+      - name: 'Build application'
+        if: startsWith(matrix.dc, 'ldc')
+        run: dub build --build=release
+      - name: 'POSIX: Move artifacts'
+        if: startsWith(matrix.dc, 'ldc') && runner.os != 'Windows'
+        run: |
+          mkdir -p dist/
+          # Remove tests binary
+          rm bin/*-test-application
+          mv bin/* dist/
+          mv gboard_autopsy.py dist/
+      - name: 'Windows: Move artifacts and fetch sqlite3.dll'
+        if: startsWith(matrix.dc, 'ldc') && runner.os == 'Windows'
+        shell: powershell
+        run: |
+          mkdir -p dist/
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/dlang-community/d2sqlite3/master/lib/win64/sqlite3.dll -OutFile ${{ github.workspace }}\dist\sqlite3.dll
+          # Remove tests binary
+          del bin/*-test-application.exe
+          move bin/* dist/
+          move gboard_autopsy.py dist/
+      - uses: actions/upload-artifact@v2
+        if: startsWith(matrix.dc, 'ldc')
+        with:
+          name: GBoard4A-${{ github.sha }}-${{ runner.os }}-release-x86_64
+          path: dist/
