@@ -48,7 +48,7 @@ function run_gboard_forensics()
 {
 	( # run tests in subshell
 		cd "$ROOT_PROJECT_FOLDER";
-		$GBOARD_FORENSICS_BIN $@
+		$GBOARD_FORENSICS_BIN --DRT-covopt="merge:1" $@
 	)
 }
 
@@ -75,6 +75,8 @@ for _test_folder in $(find $ROOT_PROJECT_FOLDER/tests/ -maxdepth 1 -mindepth 1 -
 		echo "!! No test.sh found in $_test_folder"
 		exit 1
 	fi
+
+	echo "Testing $(basename "$_test_folder")"
 
 	( # subshell to run the test case
 		cd "$_test_folder"
